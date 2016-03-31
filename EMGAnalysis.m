@@ -176,8 +176,8 @@ P1=P2(1:L/2+1);
 P1(2:end-1)=2*P1(2:end-1);
 f=Fs*(0:(L/2))/L;
 [B,A] = butter(1, .25/L*125, 'low');
-P1=filtfilt(B,A,P1);
-figure;
+% P1=filtfilt(B,A,P1);
+% figure;
 plot(f,P1)
 % 
 % %%

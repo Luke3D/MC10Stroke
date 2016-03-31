@@ -1,4 +1,4 @@
- %% GUI I/O
+%% GUI I/O
 function varargout = LabellingTool(varargin)
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -60,7 +60,7 @@ end
 function buttonLoad_Callback(hObject, eventdata, handles)
 
 
-[filename,pathname] = uigetfile('*');
+[filename,pathname] = uigetfile('Z:\Stroke MC10\PreppedData\*.csv');
 if filename == 0
     return;
 end
