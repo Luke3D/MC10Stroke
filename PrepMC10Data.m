@@ -88,7 +88,7 @@ for indDir=1:length(filenames)
             EMG=spline(EMG(:,1).', EMG(:,2).', t.');
             EMG=[t.' EMG];
 
-            [B,A] = butter(1, HPF/125, 'high');
+            [B,A] = butter(1, HPF*2/Fs, 'high');
             EMG(:,2)=filtfilt(B,A,EMG(:,2));
 
             % Extract Accel data and resample to 250 Hz
