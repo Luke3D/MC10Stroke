@@ -149,6 +149,8 @@ end
 figure
 plot(sum(xReSamp))
 
+%%
+% 
 % EMG=abs(MAS_Data(:,5));
 % [B,A] = butter(1, 15*2/Fs, 'low');
 % EMG=filtfilt(B,A,EMG);
