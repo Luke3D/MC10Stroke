@@ -7,7 +7,7 @@ clipLen=clipDur*Fs;
 clipOverlap=.5;
 clipOverlapLen=ceil(clipOverlap*clipLen);
 
-Subs={'2', '3', '5'};
+Subs={'3', '5', '6'};
 
 AllFeat=[];
 AllLabels={};

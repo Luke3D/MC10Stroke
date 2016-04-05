@@ -61,7 +61,7 @@ end
 function buttonLoad_Callback(hObject, eventdata, handles)
 
 
-[filename,pathname] = uigetfile('Z:\Stroke MC10\Activity Recognition\*labeled.csv');
+[filename,pathname] = uigetfile('Z:\Stroke MC10\Activity Recognition\ToLabel\*.csv');
 if filename == 0
     return;
 end
