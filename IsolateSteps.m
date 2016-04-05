@@ -7,7 +7,7 @@ LPF=15; % Freq for Envelope filter
 tReSamp = linspace(0,1,1001);
 
 phi = (180/pi)*atan2(MAS_Data(:,2),MAS_Data(:,3));
-ft = 1.0; %cut-off freq
+ft = 2.0; %cut-off freq
 [B,A] = butter(1, 2*ft/Fs);   %1st order, cutoff frequency 7Hz (Normalized by 2*pi*Sf) [rad/s]
 phif = filtfilt(B,A,phi);   %the filtered version of the signal
 %%
@@ -17,11 +17,12 @@ Y = fft(phif,L);     %to improve DFT alg performance set L = NFFT = 2^nextpow2(L
 Pyy = Y.*conj(Y)/L; %power spectrum
 f = Fs/2*linspace(0,1,L/2+1);   %frequency axis
 fstepsMax = 1.0;       %Upper bound on Step Freq
+fstepsMin = .20;       %Lower bound on Step Freq
 if L<250
-    [~,is] = max(Pyy(2:round(fstepsMax*L/Fs))); %approx count of steps per sec 
+    [~,is] = max(Pyy(round(fstepsMin*L/Fs):round(fstepsMax*L/Fs))); %approx count of steps per sec 
     Nsteps = f(is+1);
 else
-    [~,is] = max(Pyy(3:round(fstepsMax*L/Fs))); %approx count of steps per sec 
+    [~,is] = max(Pyy(round(fstepsMin*L/Fs):round(fstepsMax*L/Fs))); %approx count of steps per sec 
     Nsteps = f(is+2);
 end
 if isempty(Nsteps)  %if # of steps can not be reliably computed
@@ -149,8 +150,9 @@ end
 figure
 plot(sum(xReSamp))
 
-%%
-% 
+%% Manual Isolation
+% Store indices of heel strike events in stepInds matrix
+
 % EMG=abs(MAS_Data(:,5));
 % [B,A] = butter(1, 15*2/Fs, 'low');
 % EMG=filtfilt(B,A,EMG);
