@@ -4,7 +4,7 @@ Fs=50; % Sampling Frequency
 
 clipDur=5;
 clipLen=clipDur*Fs;
-clipOverlap=.9;
+clipOverlap=.5;
 clipOverlapLen=ceil(clipOverlap*clipLen);
 
 Subs={'2', '3', '5'};
@@ -16,8 +16,8 @@ TestAllLabels={};
 
 for j=1:length(Subs)
     
-Train=readtable(['CS00' Subs{j} '_Day1labeled.csv'],'ReadVariableNames',false);
-Test=readtable(['CS00' Subs{j} '_Day2labeled.csv'],'ReadVariableNames',false);
+Train=readtable(['Z:\Stroke MC10\Activity Recognition\CS00' Subs{j} '_Day1labeled.csv'],'ReadVariableNames',false);
+Test=readtable(['Z:\Stroke MC10\Activity Recognition\CS00' Subs{j} '_Day2labeled.csv'],'ReadVariableNames',false);
 
 Activities={'Lying', 'Sitting', 'Standing', 'Walking', 'Stairs Dw', 'Stairs Up'};
 actCounts=zeros(1,length(Activities));
@@ -110,6 +110,6 @@ end
 TestAllFeat=[TestAllFeat; TestFeatures];
 TestAllLabels=[TestAllLabels TestLabels];
 
-save(['CS00' Subs{j} '.mat'], 'TrainLabels', 'TrainFeatures', 'TestLabels', 'TestFeatures')
+save(['Z:\Stroke MC10\Activity Recognition\CS00' Subs{j} '.mat'], 'TrainLabels', 'TrainFeatures', 'TestLabels', 'TestFeatures')
 end
-    
+save('Z:\Stroke MC10\Activity Recognition\All_ClassifierData.mat', 'TestAllFeat', 'TestAllLabels', 'AllFeat', 'AllLabels')
