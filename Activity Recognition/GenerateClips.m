@@ -1,4 +1,5 @@
-% Generate Clips from Phone Label Data
+% Generate Clips for MC10 data from Phone Labels
+% Run after GenerateActivityData.m
 clear all
 
 clipLength=5;
@@ -34,7 +35,7 @@ for indSub=1:length(Subj)
             clip=cell2mat(table2cell(Data(...
                 (indClip-1)*(clipSize-overlapSize)+1:(indClip-1)*(clipSize-overlapSize)+clipSize,:)));
             X=mean(cross(clip(:,1:3),clip(:,4:6)));
-            Feat=[getFeatures(clip(:,1:3).') getFeatures(clip(:,4:6).') X/norm(X)^.5];
+            Feat=[getFeatures(clip(:,1:3).') getFeatures(clip(:,4:6).') X/norm(X)];
 %             Feat=getFeatures(clip(:,1:3).');
             SubjFeat=[SubjFeat; Feat];
             Label{end+1}=Activities{indAct};

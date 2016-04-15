@@ -1,8 +1,12 @@
+%% Splits walking data into steps to plot average EMG over gait cycle
+% store desired data into MAS_Data, nx5 matrix with timestamp, acc (x,y,z),
+% EMG at 250 Hz (found in Z:\Stroke MC10)
+
 %% Split Acc Data into Individual Steps
 close all
 
-th=2;
-tol=.1;
+th=2; % threshold (in sd)
+tol=.1; % tolerance (in sd)
 first=1;
 Fs=250;
 LPF=15; % Freq for Envelope filter

@@ -1,4 +1,5 @@
-%% Classify using Phone Label Data
+%% Train classifier based on MC10 data from Phone Labels
+% Run after GenerateClips.m
 Subj_CrossVal=1;
 
 nTrees=150;

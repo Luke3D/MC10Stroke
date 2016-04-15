@@ -1,8 +1,10 @@
-function [fvec, flab] = getFeatures(acc,r)
-% INPUT acc - 3 x n vector: 1-3 are xyz accelerations for n data points
+% Returns features for EMG data
+
+function [fvec, flab] = getFeatures(emg,r)
+% INPUT acc - 1 x n vector: 1-3 are xyz accelerations for n data points
 %       r - threshold for SampEn
 
-S = acc(1,:); %matrix of xyz acceleration data (excludes time data)
+S = emg(1,:); %matrix of xyz acceleration data (excludes time data)
 
 fvec = []; %stores features
 flab = {}; %stores names of features

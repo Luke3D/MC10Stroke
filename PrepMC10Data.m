@@ -1,4 +1,4 @@
-%% EMG Analysis
+%% PrepMC10Data
 % Preps EMG and ACC data for labeling
 %   -Resamples to 250 Hz
 %   -High-pass filter on EMG data
@@ -10,8 +10,8 @@ Fs=250; % Sampling Frequency
 HPF=5; % Frequency for High-Pass filter on EMG data
 initBuff=3000;
 % Subjects to exclude from loop
-RemoveSub={};
-% RemoveSub={'CS003', 'CS004', 'CS005', 'CS006', 'CS007'};
+% RemoveSub={};
+RemoveSub={'CS001', 'CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007', 'CS008', 'CS009', 'CS011', 'CS012'};
 dirname='Z:\Stroke MC10\';
 Locations={'Gastrocnemius' 'Hamstring'};
 

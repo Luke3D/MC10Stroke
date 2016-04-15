@@ -1,4 +1,6 @@
 %% Extract Activity Data using Phone Labels
+% finds MC10 data for each phone label and identifies the subject
+% interpolates data to 50 Hz and saves gastrocnemius and hamstring acc data
 
 clear all
 

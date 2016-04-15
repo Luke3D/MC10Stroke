@@ -1,4 +1,8 @@
-Subj='CS007';
+%% Save .mat file with table containing MC10 activities information
+% Copy section form annotation csv with StartTime(utc) EndTime(utc) and
+% Label
+
+Subj='CS015';
 Day='1';
 
 QuestionInd=cellfun(@(x) strcmp(x(1:9),'ActivityQ'),Times.Label);
@@ -18,7 +22,9 @@ for i=1:height(Times)
         Times.Label{i}=['MVC ' Times.Label{i}(end-1:end)];
     elseif strcmp(Times.Label{i}(1:2),'10')
         Times.Label{i}=[Times.Label{i} '_' TenMWT{indTen}];
-        indTen=indTen+1;
+        if indTen<length(TenMWT)
+            indTen=indTen+1;
+        end
     end
 end
 

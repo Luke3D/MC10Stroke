@@ -1,6 +1,8 @@
-% Generate Activity files from Phone Label Data
+% Generate Activity files for MC10 Data from Phone Labels
+% Resulting files contain trimmed label data placed stitched together
 clear all
 
+windowLength=0; % Amount to remove from both sides of data
 dirname='Z:\Stroke MC10\Activity Recognition\RawData\';
 Activities={'Lying' 'Sitting' 'Standing' 'Stairs Up' 'Stairs Down' 'Walking'};
 
@@ -19,7 +21,7 @@ for indAct=1:length(Activities)
         AllData=[];
         for indFile=1:length(filenames)
             Data=csvread([dirname 'Train\' filenames(indFile).name]);            
-            AllData=[AllData; Data];
+            AllData=[AllData; Data(windowLength*50+1:end-windowLength*50,:)];
         end
         csvwrite([dirname 'ActivityData\' Subj{indSub} '_' Activities{indAct} '_Train.csv'], AllData)
     end
@@ -31,7 +33,7 @@ for indAct=1:length(Activities)
         AllData=[];
         for indFile=1:length(filenames)
             Data=csvread([dirname 'Test\' filenames(indFile).name]);            
-            AllData=[AllData; Data];
+            AllData=[AllData; Data(windowLength*50+1:end-windowLength*50,:)];
         end
         csvwrite([dirname 'ActivityData\' Subj{indSub} '_' Activities{indAct} '_Test.csv'], AllData)
     end
