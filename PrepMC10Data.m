@@ -7,7 +7,7 @@
 clear all
 
 Fs=250; % Sampling Frequency
-HPF=5; % Frequency for High-Pass filter on EMG data
+HPF=3; % Frequency for High-Pass filter on EMG data
 initBuff=3000;
 % Subjects to exclude from loop
 % RemoveSub={};
