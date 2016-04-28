@@ -3,7 +3,7 @@
 clear all
 
 windowLength=0; % Amount to remove from both sides of data
-dirname='Z:\Stroke MC10\Activity Recognition\RawData\';
+dirname='Z:\Stroke MC10\Activity Recognition\TrimmedData\';
 Activities={'Lying' 'Sitting' 'Standing' 'Stairs Up' 'Stairs Down' 'Walking'};
 
 filenames=dir([dirname 'Train\*.csv']);

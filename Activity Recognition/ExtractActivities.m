@@ -99,14 +99,16 @@ for indLab=1:height(Act_Labels)
         tEnd=hamData(end,1);
     end
     
+    % Resample to 50 Hz to time normalize
     gasData=spline(gasData(:,1).',gasData(:,2:end).',tStart:1000/50:tEnd).';
     hamData=spline(hamData(:,1).',hamData(:,2:end).',tStart:1000/50:tEnd).';
     
     Data=[gasData hamData];
     
     Act=Act_Labels.Var5(indLab);
+    num=Act_Labels.Var1(indLab);
     
-    csvwrite(['Z:\Stroke MC10\Activity Recognition\RawData\' Day '\' Subj '_' Act{1} '_' num2str(indLab) '.csv'], Data)
+    csvwrite(['Z:\Stroke MC10\Activity Recognition\RawData\' Day '\' Subj '_' Act{1} '_' num2str(num) '.csv'], Data)
 end
   
     

@@ -1,12 +1,12 @@
 %% Train classifier based on MC10 data from Phone Labels
 % Run after GenerateClips.m
-Subj_CrossVal=1;
+Subj_CrossVal=0;
 
 nTrees=150;
 Activities={'Lying' 'Sitting' 'Standing' 'Stairs Up' 'Stairs Down' 'Walking'};
 
-Test=load([dirname 'RawData\ActivityData\TestFeat.mat']);
-Train=load([dirname 'RawData\ActivityData\TrainFeat.mat']);
+Test=load([dirname '\ActivityData\TestFeat.mat']);
+Train=load([dirname '\ActivityData\TrainFeat.mat']);
 
 Test=Test.AllFeat;
 Train=Train.AllFeat;
@@ -39,7 +39,7 @@ if ~Subj_CrossVal
     ConfMat=confusionmat(TestLabel, LabelsRF);
 
 else
-    for indFold=1:length(Test)
+    for indFold=10:length(Test)
         if isempty(Test(indFold).Features)
             continue
         end

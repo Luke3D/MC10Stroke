@@ -9,10 +9,10 @@ clipOverlap=.5;
 clipSize=ceil(clipLength*Fs);
 overlapSize=ceil(clipOverlap*clipSize);
 
-dirname='Z:\Stroke MC10\Activity Recognition\';
+dirname='Z:\Stroke MC10\Activity Recognition\TrimmedData';
 Activities={'Lying' 'Sitting' 'Standing' 'Stairs Up' 'Stairs Down' 'Walking'};
 
-filenames=dir([dirname 'RawData\ActivityData\*.csv']);
+filenames=dir([dirname '\ActivityData\*.csv']);
 names={filenames.name};
 Subj=cell(length(names),1);
 for i=1:length(names)
@@ -27,7 +27,7 @@ for indSub=1:length(Subj)
     Label={};
     SubjFeat=[];
     for indAct=1:length(Activities)
-        Data=readtable([dirname 'RawData\ActivityData\' Subj{indSub} '_' Activities{indAct} '_train.csv'],...
+        Data=readtable([dirname '\ActivityData\' Subj{indSub} '_' Activities{indAct} '_train.csv'],...
             'ReadVariableNames',false);
         numClips=floor((height(Data)-overlapSize)/(clipSize-overlapSize));
         
@@ -46,13 +46,13 @@ for indSub=1:length(Subj)
 
     AllFeat(indSub)=SubjFeatures;
 end
-save([dirname 'RawData\ActivityData\TrainFeat.mat'], 'AllFeat')
+save([dirname '\ActivityData\TrainFeat.mat'], 'AllFeat')
         
 for indSub=1:length(Subj)
     Label={};
     SubjFeat=[];
     for indAct=1:length(Activities)
-        Data=readtable([dirname 'RawData\ActivityData\' Subj{indSub} '_' Activities{indAct} '_test.csv'],...
+        Data=readtable([dirname '\ActivityData\' Subj{indSub} '_' Activities{indAct} '_test.csv'],...
             'ReadVariableNames',false);
         numClips=floor((height(Data)-overlapSize)/(clipSize-overlapSize));
         
@@ -70,4 +70,4 @@ for indSub=1:length(Subj)
 
     AllFeat(indSub)=SubjFeatures;
 end
-save([dirname 'RawData\ActivityData\TestFeat.mat'], 'AllFeat')
+save([dirname '\ActivityData\TestFeat.mat'], 'AllFeat')
