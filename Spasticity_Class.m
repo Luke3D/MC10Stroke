@@ -5,16 +5,27 @@ clear all
 
 nTrees=300;
 Activities={'IA', 'HA', 'SA'};
+FeatTrain=[];
+LabelTrain={};
+TrainFiles=rdir('Z:\Stroke MC10\LabeledData\**\Lab Day1\Ham*Feat.mat');
 
-load('Z:\Stroke MC10\LabeledData\CS004\Lab Day1\Gastrocnemius_6MWT_Feat.mat')
+for indTrain=1:length(TrainFiles)
+    load(TrainFiles(indTrain).name)
 
-FeatTrain=cell2mat({AllFeat.Features}.');
-LabelTrain={AllFeat.ActivityLabel}.';
+    FeatTrain=[FeatTrain; cell2mat({AllFeat.Features}.')];
+    LabelTrain=[LabelTrain; {AllFeat.ActivityLabel}.'];
+end
 
-load('Z:\Stroke MC10\LabeledData\CS004\Lab Day2\Gastrocnemius_10mWT_SS1_Feat.mat')
+FeatTest=[];
+LabelTest={};
+TestFiles=rdir('Z:\Stroke MC10\LabeledData\**\Lab Day2\Ham*Feat.mat');
 
-FeatTest=cell2mat({AllFeat.Features}.');
-LabelTest={AllFeat.ActivityLabel}.';
+for indTest=1:length(TestFiles)
+    load(TestFiles(indTest).name)
+
+    FeatTest=[FeatTest; cell2mat({AllFeat.Features}.')];
+    LabelTest=[LabelTest; {AllFeat.ActivityLabel}.'];
+end
 
 RFModel=TreeBagger(nTrees, FeatTrain, LabelTrain);
 [LabelsRF,P_RF] = predict(RFModel,FeatTest);

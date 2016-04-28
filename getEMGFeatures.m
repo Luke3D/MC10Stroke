@@ -6,6 +6,8 @@ function [fvec, flab] = getFeatures(emg,r)
 
 S = emg(1,:); %matrix of xyz acceleration data (excludes time data)
 
+ii=1;
+
 fvec = []; %stores features
 flab = {}; %stores names of features
 axes = {'x','y','z'};
@@ -74,23 +76,23 @@ filtered = cell(1,1);
 PSD_welch = cell(1,1);
 f_welch = cell(1,1);
 fc = 0.2; %cutoff frequency (Hz)
-fs = 30;
+fs = 250;
 f_nyq = fs/2;
 
 %High Pass Filter
-for ii = 1:1
+
     [b, a] = butter(2,(fc*pi)/f_nyq,'high');
     filtered{ii} = filter(b,a,S(ii,:)); 
-end
+
 
 %Power Spectra
-for ii = 1:1
+
     win_size = ceil(length(filtered{ii})/2);
     [PSD_welch{ii}, f_welch{ii}] = pwelch(filtered, win_size, [], [], fs);
-end
+
 
 %% Features for Each Axis (Frequency Domain)
-for ii = 1:1
+
     %Mean 
     fvec = [fvec nanmean(PSD_welch{ii})]; flab = [flab; [axes{ii} '-mean (PSD)']];
     
@@ -110,34 +112,36 @@ for ii = 1:1
     end
     
     %Mean Power for 0.5 Hz Intervals
-    bins = [0:0.5:10]; %0-10 Hz with bins for every 0.5 Hz
+    bins = [0:5:125]; %0-125 Hz with bins for every 0.5 Hz
     N = length(bins)-1;
     bin_ind = [1; zeros(N,1)];
     %PSD_welch_norm = PSD_welch{ii}/max(PSD_welch{ii});
     PSD_welch_norm = PSD_welch{ii};
     bin_val = zeros(N,1);
-    for jj = 2:length(bins) %ignore 0 Hz in bins vector
+    for jj = 1:length(bins) %ignore 0 Hz in bins vector
         freq_bin = bins(jj);
-        for zz = 2:length(f_welch{ii})
-           if ((f_welch{ii}(zz-1) < freq_bin) && (f_welch{ii}(zz) > freq_bin)) || f_welch{ii}(zz) == freq_bin
+        for zz = 1:length(f_welch{ii})
+           if ((f_welch{ii}(max(zz-1,1)) < freq_bin) && (f_welch{ii}(zz) > freq_bin)) || f_welch{ii}(zz) == freq_bin
                bin_ind(jj) = zz;
            end
         end
     end
 
-    for kk = 2:length(bins)
-        bin_val(kk) = mean(PSD_welch_norm(bin_ind(kk-1):bin_ind(kk)));
+    for kk = 1:length(bins)
+        bin_val(kk) = mean(PSD_welch_norm(bin_ind(max(kk-1,1)):bin_ind(kk)));
     end
-    fvec = [fvec bin_val(2:end)'];
-    for jj = 2:length(bin_val)
+    fvec = [fvec bin_val(1:end)'];
+    for jj = 1:length(bin_val)
         flab = [flab; [axes{ii} sprintf('_bin_%d',bins(jj))]];
     end
-end
-return
+    
+    fvec = [fvec sum(bin_val(1:4))/sum(bin_val(5:end))];
+    flab = [flab; 'f_ratio'];
 
 %% Features Across All Axes (Frequency Domain)
 %Sum of std
-fvec = [fvec sum([std(PSD_welch{1}) std(PSD_welch{2}) std(PSD_welch{3})])]; flab = [flab; 'std_sum'];
 
-fvec = [fvec SampEn(0,r,S)];
+fvec = [fvec SampEn(1,r,S.')];
 flab = [flab; 'SampEn'];
+
+return

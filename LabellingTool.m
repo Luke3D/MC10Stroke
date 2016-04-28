@@ -45,9 +45,9 @@ handles.markerNext = [];
 handles.marker1 = 0;
 handles.marker2 = 0;
 
-handles.colors = {'g','r','y'};
+handles.colors = {'g','r','y','k'};
 handles.markerTypes = {'.','+','o','*','x','s','d','^','v','>','<','p','h'};
-activityList = {'Non-Spastic Activity', 'Spastic Activity', 'Inactive'};
+activityList = {'Non-Spastic Activity', 'Spastic Activity', 'Inactive','Misc'};
 set(handles.popupmenuActivity,'string',activityList);
 wearingList = {'Gastrocnemius','Hamstring'};
     
@@ -59,12 +59,15 @@ end
 %% Callback Functions
 function buttonLoad_Callback(hObject, eventdata, handles)
 
+handles.marker1 = 0;
+handles.marker2 = 0;
+locationList = get(handles.popupmenuLocation,'string');
 
-[filename,pathname] = uigetfile('Z:\Stroke MC10\PreppedData\*.csv');
+[filename,pathname] = uigetfile(['Z:\Stroke MC10\PreppedData\' locationList{get(handles.popupmenuLocation,'value')} '*.csv']);
 if filename == 0
     return;
 end
-[N,~,R] = xlsread([pathname,filename]);
+[N,~,~] = xlsread([pathname,filename]);
 clear T;
 cla
 hold on;
@@ -86,14 +89,15 @@ set(handles.textFileLoaded,'string',[pathname,handles.filename,'.csv']);
 plot(handles.mainAxes,x,N(:,2),'b');    %AXIS 1 (Worn on Waist: Vertical) OLD convention
 % plot(handles.mainAxes,x1,N(:,3),'r');    %AXIS 2 (Horiz)
 % plot(handles.mainAxes,x1,N(:,4),'g');    %AXIS 3 (Orthogonal)
-EMG=[N(:,1) N(:,5)];
-EMG(:,2)=abs(EMG(:,2));
-[B,A] = butter(1, 5/125, 'low');
+EMG_RAW=[N(:,1) N(:,5)];
+EMG(:,2)=abs(EMG_RAW(:,2));
+[B,A] = butter(1, 20/125, 'low');
 EMG(:,2)=filtfilt(B,A,EMG(:,2));
 
 plot(handles.mainAxes,x,EMG(:,2)*10000-2,'c');
+plot(handles.mainAxes,x,EMG_RAW(:,2)*1000-1,'r');
 
-legend('ACC','EMG')
+legend('ACC','EMG','RAW')
 col = size(N,2);
 handles.activityIndex = col + 1;
 handles.locationIndex = col + 2;
@@ -121,11 +125,12 @@ end
 function buttonLabel_Callback(hObject, eventdata, handles)
 hold on
 if handles.marker2 > handles.marker1
-    [~, m1] = min(abs(handles.data(:,1)-handles.marker1));
-    [~, m2] = min(abs(handles.data(:,1)-handles.marker2));
+%     [~, m1] = min(abs(handles.data(:,1)-handles.marker1));
+    m1 = round(handles.marker1*250+1);
+    m2 = round(handles.marker2*250+1);
 else
-    [~, m1] = min(abs(handles.data(:,1)-handles.marker2));
-    [~, m2] = min(abs(handles.data(:,1)-handles.marker1));
+    m1 = round(handles.marker2*250+1);
+    m2 = round(handles.marker1*250+1);
 end
 
 activitySelect = get(handles.popupmenuActivity,'value');
@@ -139,8 +144,8 @@ Env=abs(Env);
 [B,A] = butter(1, 20/125, 'low');
 Env=filtfilt(B,A,Env);
 
-plot(handles.mainAxes,handles.marker1:.004:handles.marker2,Env(m1:m2)*10000-2,'color',handles.colors{activitySelect},...
-    'marker',handles.markerTypes{locationSelect},...
+plot(handles.mainAxes,(m1-1:m2-1)/250,Env(m1:m2)*10000-2,'color',handles.colors{activitySelect},...
+    'marker',handles.markerTypes{1},...
     'MarkerSize',1);
 
 guidata(hObject,handles);
@@ -322,25 +327,28 @@ switch currentlySelected
         set(handles.dcm,'Enable','off');
 end
 end
-function output_txt = onDCM(~,eventObj)
+function output_text = onDCM(~,eventObj)
 pos = get(eventObj,'Position');
-handles = guidata(gcbo);
-[~, p1] = min(abs(handles.data(:,1)-pos(1)));
+handles = guidata(gca);
+p1=pos(1)*250+1;
+% [~, p1] = min(abs(handles.data(:,1)-pos(1)));
 handles.dataText = pos(1);
-output_txt{1,1} = num2str(pos(1));
+temp{1,1} = num2str(pos(1));
 count = 2;
+
 if size(handles.data,2) == handles.locationIndex
-    if ~(handles.data(p1,handles.activityIndex) == 0)
+    if ~(handles.data(round(p1),handles.activityIndex) == 0)
         activityList = get(handles.popupmenuActivity,'string');
-        output_txt{count,1} = activityList{handles.data(p1,handles.activityIndex)};
+        temp{count,1} = activityList{handles.data(round(p1),handles.activityIndex)};
         count = count + 1;
     end
-    if ~(handles.data(p1,handles.locationIndex) == 0)
+    if ~(handles.data(round(p1),handles.locationIndex) == 0)
         locationList = get(handles.popupmenuLocation,'string');
-        output_txt{count,1} = locationList{handles.data(p1,handles.locationIndex)};
+        temp{count,1} = locationList{handles.data(round(p1),handles.locationIndex)};
     end
 end
-guidata(gcbo,handles);
+output_text=temp;
+guidata(gca,handles);
 end
 
 %% Helper functions

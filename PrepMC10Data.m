@@ -11,9 +11,11 @@ HPF=3; % Frequency for High-Pass filter on EMG data
 initBuff=3000;
 % Subjects to exclude from loop
 % RemoveSub={};
-RemoveSub={'CS001', 'CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007', 'CS008', 'CS009', 'CS011', 'CS012'};
+% RemoveSub={'CS001', 'CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007', 'CS008', 'CS009', 'CS011', 'CS012', 'CS013', 'CS014', 'CS015'};
+RemoveSub={};
 dirname='Z:\Stroke MC10\';
-Locations={'Gastrocnemius' 'Hamstring'};
+% Locations={'Gastrocnemius' 'Hamstring'};
+Locations={'Medial Chest'};
 
 % Identify Directories with Raw Subject Data
 filenames=dir([dirname 'CS*']);
@@ -87,40 +89,42 @@ for indDir=1:length(filenames)
             t=min(EMG(:,1)):0.004:max(EMG(:,1));
             EMG=spline(EMG(:,1).', EMG(:,2).', t.');
             EMG=[t.' EMG];
-
-            [B,A] = butter(1, HPF*2/Fs, 'high');
-            EMG(:,2)=filtfilt(B,A,EMG(:,2));
-
-            % Extract Accel data and resample to 250 Hz
-            [~,Start]=min(abs(accel(:,1)-Times.Start(i)+initBuff));
-            [~,Stop]=min(abs(accel(:,1)-Times.End(i)-initBuff));
+            Data=EMG;
             
-            ACC=accel(Start:Stop,:);
-            ACC(:,1)=(ACC(:,1))/1000;
+            if ~strcmp(Locations{indLoc},'Medial Chest')
+                [B,A] = butter(1, HPF*2/Fs, 'high');
+                EMG(:,2)=filtfilt(B,A,EMG(:,2));
 
-            t=min(EMG(:,1)):0.004:max(EMG(:,1));
-            ACC=spline(ACC(:,1).', ACC(:,2:end).', t.');
-            t=t-t(1);
-            ACC=[t.' ACC.'];
-            
-            % Store data together
-            Data=[ACC EMG(:,2)];
-            
-            % Add Hamstring accel data if using Hamstring EMG
-            if ~strcmp(Locations{indLoc},'Gastrocnemius')
-                ham_acc=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
-                    '\' datafiles(ind).name '\sensors\accel.csv']);
-                [~,Start]=min(abs(ham_acc(:,1)-Times.Start(i)+initBuff));
-                [~,Stop]=min(abs(ham_acc(:,1)-Times.End(i)-initBuff));
-                HAM=accel(Start:Stop,:);
-                HAM(:,1)=(HAM(:,1))/1000;
+                % Extract Accel data and resample to 250 Hz
+                [~,Start]=min(abs(accel(:,1)-Times.Start(i)+initBuff));
+                [~,Stop]=min(abs(accel(:,1)-Times.End(i)-initBuff));
+
+                ACC=accel(Start:Stop,:);
+                ACC(:,1)=(ACC(:,1))/1000;
 
                 t=min(EMG(:,1)):0.004:max(EMG(:,1));
-                HAM=spline(HAM(:,1).', HAM(:,2:end).', t.');
-                HAM=[t.' HAM.'];
-                Data=[Data HAM(:,2:end)];
+                ACC=spline(ACC(:,1).', ACC(:,2:end).', t.');
+                t=t-t(1);
+                ACC=[t.' ACC.'];
+
+                % Store data together
+                Data=[ACC EMG(:,2)];
+
+                % Add Hamstring accel data if using Hamstring EMG
+                if ~strcmp(Locations{indLoc},'Gastrocnemius')
+                    ham_acc=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
+                        '\' datafiles(ind).name '\sensors\accel.csv']);
+                    [~,Start]=min(abs(ham_acc(:,1)-Times.Start(i)+initBuff));
+                    [~,Stop]=min(abs(ham_acc(:,1)-Times.End(i)-initBuff));
+                    HAM=accel(Start:Stop,:);
+                    HAM(:,1)=(HAM(:,1))/1000;
+
+                    t=min(EMG(:,1)):0.004:max(EMG(:,1));
+                    HAM=spline(HAM(:,1).', HAM(:,2:end).', t.');
+                    HAM=[t.' HAM.'];
+                    Data=[Data HAM(:,2:end)];
+                end
             end
-            
             % Save prepped data
             X=cell2mat(Times.Label(i));
 

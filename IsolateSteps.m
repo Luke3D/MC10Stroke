@@ -5,7 +5,7 @@
 %% Split Acc Data into Individual Steps
 close all
 
-th=2; % threshold (in sd)
+th=1.5; % threshold (in sd)
 tol=.1; % tolerance (in sd)
 first=1;
 Fs=250;
@@ -84,7 +84,7 @@ while k<length(ind0m)
     %     plot(t{k},x{k})
     %resample to uniform # of points and normalize amplitude
     xnew = interp1(t{stepInd},x{stepInd},tReSamp);
-    xnew = xnew./max(abs(xnew));         %normalize amplitude
+    xnew = xnew./max(abs(xnew))+1;         %normalize amplitude
     xReSamp = [xReSamp;xnew];
 
     %compute RMSE between 2 consecutive trials
@@ -101,8 +101,14 @@ while k<length(ind0m)
     % input('')
 
 end
-figure
-plot(mean(xReSamp))
+
+s=std(xReSamp);
+m=mean(xReSamp);
+
+figure; hold on
+area(0:1:1000,m+s,'FaceColor','g')
+area(0:1:1000,m-s,'FaceColor','w')
+plot(m)
 
 %% Manual Isolation
 % Store indices of heel strike events in stepInds matrix

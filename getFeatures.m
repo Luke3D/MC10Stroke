@@ -108,7 +108,7 @@ filtered = cell(3,1);
 PSD_welch = cell(3,1);
 f_welch = cell(3,1);
 fc = 0.2; %cutoff frequency (Hz)
-fs = 30;
+fs = 250;
 f_nyq = fs/2;
 
 %High Pass Filter
