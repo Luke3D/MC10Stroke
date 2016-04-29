@@ -90,6 +90,7 @@ for indDir=1:length(filenames)
             EMG=spline(EMG(:,1).', EMG(:,2).', t.');
             EMG=[t.' EMG];
             Data=EMG;
+                  
             
             if ~strcmp(Locations{indLoc},'Medial Chest')
                 [B,A] = butter(1, HPF*2/Fs, 'high');
@@ -109,20 +110,21 @@ for indDir=1:length(filenames)
 
                 % Store data together
                 Data=[ACC EMG(:,2)];
+            end
+            % Add Hamstring accel data if using Hamstring EMG
+            if ~strcmp(Locations{indLoc},'Gastrocnemius')
+                ham_acc=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
+                    '\' datafiles(ind).name '\sensors\accel.csv']);
+                [~,Start]=min(abs(ham_acc(:,1)-Times.Start(i)+initBuff));
+                [~,Stop]=min(abs(ham_acc(:,1)-Times.End(i)-initBuff));
+                ACC=ham_acc(Start:Stop,:);
+                ACC(:,1)=(ACC(:,1))/1000;
 
-                % Add Hamstring accel data if using Hamstring EMG
-                if ~strcmp(Locations{indLoc},'Gastrocnemius')
-                    ham_acc=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
-                        '\' datafiles(ind).name '\sensors\accel.csv']);
-                    [~,Start]=min(abs(ham_acc(:,1)-Times.Start(i)+initBuff));
-                    [~,Stop]=min(abs(ham_acc(:,1)-Times.End(i)-initBuff));
-                    HAM=accel(Start:Stop,:);
-                    HAM(:,1)=(HAM(:,1))/1000;
-
-                    t=min(EMG(:,1)):0.004:max(EMG(:,1));
-                    HAM=spline(HAM(:,1).', HAM(:,2:end).', t.');
-                    HAM=[t.' HAM.'];
-                    Data=[Data HAM(:,2:end)];
+                t=min(EMG(:,1)):0.02:max(EMG(:,1));
+                ACC=spline(ACC(:,1).', ACC(:,2:end).', t.');
+                ACC=[t.' ACC.'];
+                if ~strcmp(Locations{indLoc},'Medial Chest')
+                    Data=[Data ACC(:,2:end)];
                 end
             end
             % Save prepped data
@@ -130,6 +132,9 @@ for indDir=1:length(filenames)
 
             saveName=[dirname 'PreppedData\' subject '\Lab Day' num2str(Day) '\' Locations{indLoc} ...
                 '_' X '_emgData.csv'];
+            
+            accName=[dirname '6MWT ACC\' subject '_Day' num2str(Day) ...
+                '_' X '_accData.csv'];
 
             if ~exist([dirname 'PreppedData\' subject], 'dir')
                 mkdir([dirname 'PreppedData\' subject])
@@ -139,6 +144,7 @@ for indDir=1:length(filenames)
             end
 
             dlmwrite(saveName,Data,'delimiter',',','precision',13)
+            dlmwrite(accName,ACC,'delimiter',',','precision',13)
         end
     end
     end
