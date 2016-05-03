@@ -71,7 +71,7 @@ for indFile=1:length(filenames)
         ACC_all{indClip-skips}=ACC(indStart:indEnd,:);
         
 %         Features{indClip}=[getFeatures(ACC(indStart:indEnd,:).') getEMGFeatures(EMG(indStart:indEnd,:).',std(EMG)*.2) getEMGFeatures(EMG_env(indStart:indEnd).',std(EMG)*.2)];
-        Features{indClip-skips}=[getEMGFeatures(EMG(indStart:indEnd,:).',std(EMG)*.2) getEMGFeatures(EMG_env(indStart:indEnd).',std(EMG)*.2)];
+        Features{indClip-skips}=[getEMGFeatures_New(EMG(indStart:indEnd,:).',std(EMG)*.2) getEMGFeatures_New(EMG_env(indStart:indEnd).',std(EMG)*.2)];
     end
     Label(cellfun(@isempty,Label)==1)=[];
     ACC_all(cellfun(@isempty,ACC_all)==1)=[];

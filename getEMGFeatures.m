@@ -1,6 +1,6 @@
 % Returns features for EMG data
 
-function [fvec, flab] = getFeatures(emg,r)
+function [fvec, flab] = getEMGFeatures(emg,r)
 % INPUT acc - 1 x n vector: 1-3 are xyz accelerations for n data points
 %       r - threshold for SampEn
 
