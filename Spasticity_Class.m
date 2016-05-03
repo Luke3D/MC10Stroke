@@ -3,7 +3,7 @@
 
 clear all
 
-nTrees=300;
+nTrees=50;
 Activities={'IA', 'HA', 'SA'};
 FeatTrain=[];
 LabelTrain={};
@@ -50,3 +50,25 @@ set(gca,'YTick',[1 2 3])
 
 
 WAcc=sum(diag(ConfMatAll))/sum(sum(ConfMatAll));
+
+
+%Visualize the features
+Ytr = zeros(size(LabelTrain));
+Yte = zeros(size(LabelTest));
+
+for c = 1:length(unique(Activities))
+    indTr = strcmp(LabelTrain,Activities{c});
+    indTe = strcmp(LabelTest,Activities{c});
+    Ytr(indTr) = c; Yte(indTe) = c;    
+end
+%Z-score data
+FeatTrain = zscore(FeatTrain); 
+mu = mean(FeatTrain); sigma = std(FeatTrain);
+FeatTest = (FeatTest-repmat(mu,[length(FeatTest) 1]))./repmat(sigma,[length(FeatTest) 1])
+figure, boxplot(FeatTrain)
+%Scatter plot of the features
+figure, gplotmatrix(FeatTrain(:,[1 4]),FeatTrain(:,[6 7]),Ytr,[],'o',6),
+legend(Activities)
+figure, gplotmatrix(FeatTest(:,[1 4]),FeatTest(:,[6 7]),Yte,[],'o',6),
+legend(Activities)
+

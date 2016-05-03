@@ -32,7 +32,7 @@ for indFile=1:length(filenames)
     EMG=cell2mat(table2cell(Data(:,5)));
     ACC=cell2mat(table2cell(Data(:,accLoc:accLoc+2)));
     EMG_env=abs(EMG);
-    [B,A] = butter(1, 5/125, 'low');
+    [B,A] = butter(1, 15/125, 'low');
     EMG_env=filtfilt(B,A,EMG_env);
     
     numClips=floor((height(Data)-overlapSize)/(clipSize-overlapSize));
@@ -71,7 +71,10 @@ for indFile=1:length(filenames)
         ACC_all{indClip-skips}=ACC(indStart:indEnd,:);
         
 %         Features{indClip}=[getFeatures(ACC(indStart:indEnd,:).') getEMGFeatures(EMG(indStart:indEnd,:).',std(EMG)*.2) getEMGFeatures(EMG_env(indStart:indEnd).',std(EMG)*.2)];
-        Features{indClip-skips}=[getEMGFeatures_New(EMG(indStart:indEnd,:).',std(EMG)*.2) getEMGFeatures_New(EMG_env(indStart:indEnd).',std(EMG)*.2)];
+        %combine raw emg features and emg envelope features
+%         Features{indClip-skips}=[getEMGFeatures_New(EMG(indStart:indEnd,:).',std(EMG)*.2) getEMGFeatures_New(EMG_env(indStart:indEnd).',std(EMG)*.2)];
+        Features{indClip-skips}= getEMGFeatures_New(EMG(indStart:indEnd,:).',std(EMG)*.2);
+
     end
     Label(cellfun(@isempty,Label)==1)=[];
     ACC_all(cellfun(@isempty,ACC_all)==1)=[];
