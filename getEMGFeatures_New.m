@@ -9,7 +9,7 @@ X = emg(1,:); %EMG channels
 fvec = []; %stores features
 flab = {}; %stores names of features
 %axes = {'x','y','z'};
-epsthresh = 15E-3;  %threshold to be tuned based on the peak noise amp
+epsthresh = 1E-5;  %threshold to be tuned based on the peak noise amp
 fs = 250;           %Sampling Freq [Hz]
 
 %% Features for Each Channel (Time Domain)

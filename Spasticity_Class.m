@@ -64,7 +64,7 @@ end
 %Z-score data
 FeatTrain = zscore(FeatTrain); 
 mu = mean(FeatTrain); sigma = std(FeatTrain);
-FeatTest = (FeatTest-repmat(mu,[length(FeatTest) 1]))./repmat(sigma,[length(FeatTest) 1])
+FeatTest = (FeatTest-repmat(mu,[length(FeatTest) 1]))./repmat(sigma,[length(FeatTest) 1]);
 figure, boxplot(FeatTrain)
 %Scatter plot of the features
 figure, gplotmatrix(FeatTrain(:,[1 4]),FeatTrain(:,[6 7]),Ytr,[],'o',6),
