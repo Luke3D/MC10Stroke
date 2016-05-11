@@ -93,7 +93,11 @@ class BioStampRCIO(object):
         recData= recording[0]['recording']
         studyData= self.api.BioStampRCGetStudy(recData['studyId'])
         subjectData= self.api.BioStampRCGetSubject(recData['studyId'], recData['subjectId'])
-        metadataFile= open("{}_metadata.csv".format(filenameHeader), "w")
+        f="{}_metadata.csv".format(filenameHeader)
+        d = os.path.dirname(f)
+        if not os.path.exists(d):
+            os.makedirs(d)
+        metadataFile= open(f, "w")
         metadataFile.write("Study,{},{}\n".format(studyData['displayName'], studyData['title']))
         metadataFile.write("Subject ID,{},Age,{}".format(subjectData['displayName'],subjectData['age']))
         # The gender and dominantHand attributes are not set if they aren't specified when the Subject is created,
@@ -140,7 +144,11 @@ class BioStampRCIO(object):
     
     def writeExGData(self, filenameHeader, mode, recordings):
         trueMode= "ECG" if "ECG" in mode else "EMG"
-        outFile= open("{}_{}.csv".format(filenameHeader, trueMode), "w")
+        f="{}_{}.csv".format(filenameHeader, trueMode)
+        d = os.path.dirname(f)
+        if not os.path.exists(d):
+            os.makedirs(d)
+        outFile= open(f, "w")
         outFile.write("Date/Time,Epoch Time (msec),{} Signal (Volts)\n".format(trueMode))
         for recording in recordings:
             if recording['type'] == trueMode:
@@ -149,7 +157,11 @@ class BioStampRCIO(object):
         outFile.close()
                     
     def writeAccelData(self, filenameHeader, mode, recordings):
-        outFile= open("{}_Accel.csv".format(filenameHeader), "w")
+        f="{}_Gyro.csv".format(filenameHeader)
+        d = os.path.dirname(f)
+        if not os.path.exists(d):
+            os.makedirs(d)
+        outFile= open(f, "w")
         outFile.write("Date/Time,Epoch Time (msec),X Accel (G),Y Accel (G),Z Accel (G)\n")
         for recording in recordings:
             if recording['type'] == "ACCEL":
@@ -158,7 +170,11 @@ class BioStampRCIO(object):
         outFile.close()
                     
     def writeGyroData(self, filenameHeader, mode, recordings):
-        outFile= open("{}_Gyro.csv".format(filenameHeader), "w")
+        f="{}_Gyro.csv".format(filenameHeader)
+        d = os.path.dirname(f)
+        if not os.path.exists(d):
+            os.makedirs(d)
+        outFile= open(f, "w")
         outFile.write("Date/Time,Epoch Time (msec),X Rotation (deg/sec),Y Rotation (deg/sec),Z Rotation (deg/sec)\n")
         for recording in recordings:
             if recording['type'] == "GYRO":
@@ -181,13 +197,14 @@ class BioStampRCIO(object):
         self.writeData(filenameHeader, mode, recording)
         return True
 
-    def annotationToCSV(self, recording, filenameHeader, annoRelations):
+    def annotationToCSV(self, recording, filenameHeader, annoRelations, selSubject, selAct, selTime):
         if filenameHeader[-4:] == ".csv":
             filenameHeader= filenameHeader[:-4]
         if len(recording) > 0:
-            mode= self.writeMetadata(filenameHeader, recording, annoRelations)
+            t=self.prettyTime(recording[1]['times'][1])
+            d=filenameHeader+"\\"+selSubject+"\\"+t[4:10]+"\\"
+            mode= self.writeMetadata("{}{}_{}-{}-{}".format(d,selAct,selTime[11:13],selTime[14:16],selTime[17:19]), recording, annoRelations)
             sensorsSeen= [] # Only print data for each Sensor once. We need to check for multiple Sensors in case we're exporting Activity data
-            d=filenameHeader+str(recording[1]['times'][1])+"\\"
             if not os.path.exists(d):
                 os.makedirs(d)
             for rec in recording:
@@ -202,7 +219,7 @@ class BioStampRCIO(object):
                         if reco['recording']['udid'] == sensorsSeen[-1]:
                             sensorRec.append(reco)
                     if len(sensorRec) > 0:
-                        self.writeData("{}{}".format(d, sensorName), mode, sensorRec)
+                        self.writeData("{}{}\\{}_{}-{}-{}".format(d, sensorName, selAct,selTime[11:13],selTime[14:16],selTime[17:19]), mode, sensorRec)
             return True
         else:
             return False
