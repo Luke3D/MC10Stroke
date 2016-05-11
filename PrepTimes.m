@@ -1,8 +1,8 @@
 %% Save .mat file with table containing MC10 activities information
 % Copy section form annotation csv with StartTime(utc) EndTime(utc) and
-% Label
+% Label into Times variable before running
 
-Subj='CS015';
+Subj='NickTest';
 Day='1';
 
 QuestionInd=cellfun(@(x) strcmp(x(1:9),'ActivityQ'),Times.Label);
@@ -28,6 +28,9 @@ for i=1:height(Times)
     end
 end
 
+
+
+%% Save Times File as .mat
 if ~exist(['Z:\Stroke MC10\' Subj], 'dir')
     mkdir(['Z:\Stroke MC10\' Subj])
 end

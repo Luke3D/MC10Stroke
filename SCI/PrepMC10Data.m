@@ -12,9 +12,9 @@ initBuff=3000;
 % Subjects to exclude from loop
 % RemoveSub={'CS001', 'CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007', 'CS008', 'CS009', 'CS011', 'CS012', 'CS013', 'CS014', 'CS015'};
 RemoveSub={};
-dirname='Z:\Stroke MC10\';
-% Locations={'Gastrocnemius' 'Hamstring'};
-Locations={'Medial Chest'};
+dirname='Z:\Stroke MC10\SCI\';
+Locations={'HA','RF','GA','TA','Foot','Heel'};
+% Locations={'Medial Chest'};
 
 % Identify Directories with Raw Subject Data
 filenames=dir([dirname 'CS*']);
