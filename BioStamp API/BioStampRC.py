@@ -73,6 +73,7 @@ class BioStampRC(object):
                             outputName= input("Output folder: ")
                             for val in range(0,annotationNumber):
                                 anno= annotationList[val]
+                                #print(anno.keys())
                                 sa= self.io.stringifyAnnotation(anno)
                                 data= self.api.BioStampRCGetAnnotationData(anno["studyId"], anno["id"])
                                 #print("Annotation Data: {}".format(data))
@@ -81,7 +82,8 @@ class BioStampRC(object):
                                 for annotationKey in annotations.keys():
                                     if "event" in annotations[annotationKey] and "relationship" in annotations[annotationKey]["event"]:
                                         if annotations[annotationKey]["event"]["relationship"]["id"] == anno["event"]["id"]:
-                                            annoRelations.append(annotations[annotationKey]) 
+                                            if annotations[annotationKey]["stopTs"]==anno["stopTs"]:
+                                                annoRelations.append(annotations[annotationKey]) 
                                 self.io.annotationToCSV(data, outputName, annoRelations, subjectList[subjectNumber]['displayName'],sa[1],sa[2])
                             
                     else:

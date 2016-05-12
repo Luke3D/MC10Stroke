@@ -1,4 +1,5 @@
 %% PrepMC10Data
+% Sorts Through Available Subject Data
 % Preps EMG and ACC data for labeling
 %   -Resamples to 250 Hz
 %   -High-pass filter on EMG data
@@ -6,145 +7,119 @@
 %   -Includes Gastrocs accel data for both locations (used for labeling)
 clear all
 
-Fs=250; % Sampling Frequency
-HPF=3; % Frequency for High-Pass filter on EMG data
-initBuff=3000;
+Fs=250; % Sampling Frequency of EMG
+HPF=3; % Frequency for High-Pass filter on EMG data (Hz)
 % Subjects to exclude from loop
-% RemoveSub={'CS001', 'CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007', 'CS008', 'CS009', 'CS011', 'CS012', 'CS013', 'CS014', 'CS015'};
 RemoveSub={};
-dirname='Z:\Stroke MC10\SCI\';
-Locations={'HAM','RF','GA','TA','Foot','Heel'};
+
+dirname='Z:\Stroke MC10\SCI';
+Locations={'HA','RF','GA','TA','Foot','Heel'};
 % Locations={'Medial Chest'};
+Segments={'Thigh' 'Shank'};
 
 % Identify Directories with Raw Subject Data
-filenames=dir([dirname 'CS*']);
-NotDirectories=cellfun(@(x) x==0, {filenames.isdir});
-filenames(NotDirectories)=[];
+subjnames=dir([dirname '\NST*']);
+Directories=cellfun(@(x) x==0, {subjnames.isdir});
+subjnames(Directories)=[];
 % Remove listed subjects from loop
 for i=1:length(RemoveSub)
-    ExtraSub=cellfun(@(x) strcmp(x,RemoveSub{i}), {filenames.name});
-    filenames(ExtraSub)=[];
+    ExtraSub=cellfun(@(x) strcmp(x,RemoveSub{i}), {subjnames.name});
+    subjnames(ExtraSub)=[];
 end
 
 % Loop through subjects and lab sessions
-for indDir=1:length(filenames)
-    for Day=1:2
-        numDay=num2str(Day);
-        subject=filenames(indDir).name;
-        TimesName=[dirname subject '\Lab Day ' numDay '\' subject '_Day' numDay '_Times.mat'];
-        % skip if data missing
-        if ~exist(TimesName,'file')
-            continue
-        end
-        load([dirname subject '\Lab Day ' numDay '\' subject '_Day' numDay '_Times.mat'])
-    % Loop through activity list in Times
-    parfor i=1:height(Times)
-        for indLoc=1:length(Locations)
-            startStamp=datetime(1970, 1, 1, 0, 0, Times.Start(i)/1000);
+for indDir=1:length(subjnames)
+    subject=subjnames(indDir).name;
+    days=dir([dirname '\' subject]);
+    days(1:2)=[];
+    for indDay=1:length(days)
+        day=days(indDay).name;
+        sensors=['D5LA7WZ6'; 'D5LA7XEW'; 'D5LA7XJP'; 'D5LA7XNA'; 'D14SPK1B'; 'D5LA7XK4'];
+        for indSens=4:2:6
+            sensor=sensors(indSens,:);
 
-            datafiles=dir([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} '\']);
-            NotDirectories=cellfun(@(x) strcmp(x(1),'.'), {datafiles.name});
-            datafiles(NotDirectories)=[];
-
-            % Get timestamps of recording start from file names
-            fileStamp=datetime(zeros(2,3));
+            datafiles=dir([dirname '\' subject '\' day '\' sensor '\*Accel.csv']);
+            
+            names=cell(length(datafiles));
+            events=cell(length(datafiles));
+            
+            for i=1:length(datafiles)
+                names{i}=strsplit(datafiles(i).name,{'_' '.'});
+                events{i}=names{i}{1};
+            end
+            
             for indData=1:length(datafiles)
-                fileTime=datafiles(indData).name;            
-                fileStamp(indData)=datetime(str2double(fileTime(1:4)), str2double(fileTime(6:7)), str2double(fileTime(9:10)),...
-                    str2double(fileTime(12:13)), str2double(fileTime(15:16)), str2double(fileTime(17:18)));
-            end
-
-            % Multiple data recordings may be present
-            % Find index of correct recording file
-            ind=find(startStamp>fileStamp==0,1);
-            if ind>1
-                ind=ind-1;
-            end
-            if isempty(ind)
-                ind=length(datafiles);
-            end
-
-            % Load EMG data
-            afe=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
-                '\' datafiles(ind).name '\sensors\afe.csv']);
-            % Only load accel data from Gastrocs
-            if strcmp(Locations{indLoc},'Gastrocnemius')
-                accel=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
-                    '\' datafiles(ind).name '\sensors\accel.csv']);
-            end
-            % Identify start and end indices in data
-            [~,Start]=min(abs(afe(:,1)-Times.Start(i)+initBuff));
-            [~,Stop]=min(abs(afe(:,1)-Times.End(i)-initBuff));
-
-            if Start-Stop==0
-                continue
-            end
-
-            EMG=afe(Start:Stop,:);
-            
-            % Resample EMG to 250 Hz
-            EMG(:,1)=(EMG(:,1))/1000;
-
-            t=min(EMG(:,1)):0.004:max(EMG(:,1));
-            EMG=spline(EMG(:,1).', EMG(:,2).', t.');
-            EMG=[t.' EMG];
-            Data=EMG;
-                  
-            
-            if ~strcmp(Locations{indLoc},'Medial Chest')
-                [B,A] = butter(1, HPF*2/Fs, 'high');
-                EMG(:,2)=filtfilt(B,A,EMG(:,2));
-
-                % Extract Accel data and resample to 250 Hz
-                [~,Start]=min(abs(accel(:,1)-Times.Start(i)+initBuff));
-                [~,Stop]=min(abs(accel(:,1)-Times.End(i)-initBuff));
-
-                ACC=accel(Start:Stop,:);
-                ACC(:,1)=(ACC(:,1))/1000;
-
-                t=min(EMG(:,1)):0.004:max(EMG(:,1));
-                ACC=spline(ACC(:,1).', ACC(:,2:end).', t.');
-                t=t-t(1);
-                ACC=[t.' ACC.'];
-
-                % Store data together
-                Data=[ACC EMG(:,2)];
-            end
-            % Add Hamstring accel data if using Hamstring EMG
-            if ~strcmp(Locations{indLoc},'Gastrocnemius')
-                ham_acc=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
-                    '\' datafiles(ind).name '\sensors\accel.csv']);
-                [~,Start]=min(abs(ham_acc(:,1)-Times.Start(i)+initBuff));
-                [~,Stop]=min(abs(ham_acc(:,1)-Times.End(i)-initBuff));
-                ACC=ham_acc(Start:Stop,:);
-                ACC(:,1)=(ACC(:,1))/1000;
-
-                t=min(EMG(:,1)):0.02:max(EMG(:,1));
-                ACC=spline(ACC(:,1).', ACC(:,2:end).', t.');
-                ACC=[t.' ACC.'];
-                if ~strcmp(Locations{indLoc},'Medial Chest')
-                    Data=[Data ACC(:,2:end)];
+                name=names{indData};
+                ACCdata=table2cell(readtable([dirname '\' subject '\' day '\' sensor ...
+                    '\' datafiles(indData).name],'ReadVariableNames',false,'HeaderLines',1));
+                ACCdata=cell2mat(ACCdata(:,2:end));
+                
+                EMGsensor1=sensors(indSens-3,:);
+                EMGsensor2=sensors(indSens-2,:);
+                
+                EMGdata1=table2cell(readtable([dirname '\' subject '\' day '\' EMGsensor1 ...
+                    '\' datafiles(indData).name(1:end-9) 'EMG.csv'],...
+                    'ReadVariableNames',false,'HeaderLines',1));
+                EMGdata1=cell2mat(EMGdata1(:,2:3));
+                
+                EMGdata2=table2cell(readtable([dirname '\' subject '\' day '\' EMGsensor2 ...
+                    '\' datafiles(indData).name(1:end-9) 'EMG.csv'],...
+                    'ReadVariableNames',false,'HeaderLines',1));
+                EMGdata2=cell2mat(EMGdata2(:,2:3));
+                
+                event=name{1};
+                
+                % Check for other files with same event to get an index to
+                % Distinguish distinct repititions
+                before_matches=strcmp(events(1:indData-1), ...
+                    events{indData});
+                before_matches=sum(before_matches);
+                event_ind=before_matches+1;
+                
+                if before_matches==0;
+                    after_matches=strcmp(events(indData+1:end), ...
+                        events{indData});
+                    after_matches=sum(after_matches);
+                    event_ind=(after_matches>0);
                 end
-            end
-            % Save prepped data
-            X=cell2mat(Times.Label(i));
+                
+                if event_ind
+                    event=[event '_' num2str(event_ind)];
+                end
+                
+                dataSavename=[event '.csv'];
+                
+                % Identify start and end indices in data
+                Start=max([EMGdata1(1,1) EMGdata2(1,1) ACCdata(1,1)])/1000;
+                Stop=min([EMGdata1(end,1) EMGdata2(end,1) ACCdata(end,1)])/1000;
 
-            saveName=[dirname 'PreppedData\' subject '\Lab Day' num2str(Day) '\' Locations{indLoc} ...
-                '_' X '_emgData.csv'];
-            
-            accName=[dirname '6MWT ACC\' subject '_Day' num2str(Day) ...
-                '_' X '_accData.csv'];
+                % Resample data to 250 Hz
+                ACCdata(:,1)=(ACCdata(:,1))/1000;
+                EMGdata1(:,1)=(EMGdata1(:,1))/1000;
+                EMGdata2(:,1)=(EMGdata2(:,1))/1000;
 
-            if ~exist([dirname 'PreppedData\' subject], 'dir')
-                mkdir([dirname 'PreppedData\' subject])
-            end
-            if ~exist([dirname 'PreppedData\' subject '\Lab Day' num2str(Day)], 'dir')
-                mkdir([dirname 'PreppedData\' subject '\Lab Day' num2str(Day)])
-            end
+                t=Start:0.004:Stop;
 
-            dlmwrite(saveName,Data,'delimiter',',','precision',13)
-            dlmwrite(accName,ACC,'delimiter',',','precision',13)
+                ACCdata=spline(ACCdata(:,1).', ACCdata(:,2:end).', t.').';
+                EMGdata1=spline(EMGdata1(:,1).', EMGdata1(:,2).', t.');
+                EMGdata2=spline(EMGdata2(:,1).', EMGdata2(:,2).', t.');
+
+                [B,A] = butter(1, HPF*2/Fs, 'high');
+                EMGdata1=filtfilt(B,A,EMGdata1);
+                EMGdata2=filtfilt(B,A,EMGdata2);
+                
+                Data=[(t-t(1)).' ACCdata EMGdata1 EMGdata2];
+
+                Data=table(Data(:,1), Data(:,2), Data(:,3), Data(:,4), Data(:,5), Data(:,6),'VariableNames',{'Time','xACC','yACC',...
+                    'zACC',Locations{indSens-3},Locations{indSens-2}});
+
+                if ~exist([dirname '\EMGtoLabel\' subject '\' day '\' Segments{indSens/2-1}], 'dir')
+                    mkdir([dirname '\EMGtoLabel\' subject '\' day '\' Segments{indSens/2-1}])
+                end
+
+                writetable(Data,[dirname '\EMGtoLabel\' subject '\' day ...
+                    '\' Segments{indSens/2-1} '\' dataSavename])
+            end
         end
-    end
     end
 end
