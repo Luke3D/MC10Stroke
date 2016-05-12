@@ -14,7 +14,7 @@ RemoveSub={};
 
 dirname='Z:\Stroke MC10\SCI\RawData';
 savedirname='Z:\Stroke MC10\SCI';
-Locations={'HA','RF','GA','TA','Foot','Heel'};
+Locations={'HA','RF','MG','TA','Heel','Foot'};
 % Locations={'Medial Chest'};
 Segments={'Thigh' 'Shank'};
 
@@ -35,7 +35,7 @@ for indDir=1:length(subjnames)
     days(1:2)=[];
     for indDay=1:length(days)
         day=days(indDay).name;
-        sensors=['D5LA7WZ6'; 'D5LA7XEW'; 'D5LA7XJP'; 'D5LA7XNA'; 'D14SPK1B'; 'D5LA7XK4'];
+        sensors=['D5LA7WZ6'; 'D5LA7XNA'; 'D5LA7XEW'; 'D5LA7XJP'; 'D14SPK1B'; 'D5LA7XK4'];
         for indSens=4:2:6
             sensor=sensors(indSens,:);
 
@@ -52,7 +52,7 @@ for indDir=1:length(subjnames)
             for indData=1:length(datafiles)
                 name=names{indData};
                 ACCdata=table2cell(readtable([dirname '\' subject '\' day '\' sensor ...
-                    '\' datafiles(indData).name],'ReadVariableNames',false,'HeaderLines',1));
+                    '\' datafiles(indData).name],'ReadVariableNames',false,'HeaderLines',1,'Delimiter',','));
                 ACCdata=cell2mat(ACCdata(:,2:end));
                 
                 EMGsensor1=sensors(indSens-3,:);
@@ -60,12 +60,12 @@ for indDir=1:length(subjnames)
                 
                 EMGdata1=table2cell(readtable([dirname '\' subject '\' day '\' EMGsensor1 ...
                     '\' datafiles(indData).name(1:end-9) 'EMG.csv'],...
-                    'ReadVariableNames',false,'HeaderLines',1));
+                    'ReadVariableNames',false,'HeaderLines',1,'Delimiter',','));
                 EMGdata1=cell2mat(EMGdata1(:,2:3));
                 
                 EMGdata2=table2cell(readtable([dirname '\' subject '\' day '\' EMGsensor2 ...
                     '\' datafiles(indData).name(1:end-9) 'EMG.csv'],...
-                    'ReadVariableNames',false,'HeaderLines',1));
+                    'ReadVariableNames',false,'HeaderLines',1,'Delimiter',','));
                 EMGdata2=cell2mat(EMGdata2(:,2:3));
                 
                 event=name{1};
