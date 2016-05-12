@@ -12,7 +12,8 @@ HPF=3; % Frequency for High-Pass filter on EMG data (Hz)
 % Subjects to exclude from loop
 RemoveSub={};
 
-dirname='Z:\Stroke MC10\SCI';
+dirname='Z:\Stroke MC10\SCI\RawData';
+savedirname='Z:\Stroke MC10\SCI';
 Locations={'HA','RF','GA','TA','Foot','Heel'};
 % Locations={'Medial Chest'};
 Segments={'Thigh' 'Shank'};
@@ -113,11 +114,11 @@ for indDir=1:length(subjnames)
                 Data=table(Data(:,1), Data(:,2), Data(:,3), Data(:,4), Data(:,5), Data(:,6),'VariableNames',{'Time','xACC','yACC',...
                     'zACC',Locations{indSens-3},Locations{indSens-2}});
 
-                if ~exist([dirname '\EMGtoLabel\' subject '\' day '\' Segments{indSens/2-1}], 'dir')
-                    mkdir([dirname '\EMGtoLabel\' subject '\' day '\' Segments{indSens/2-1}])
+                if ~exist([savedirname '\EMGtoLabel\' subject '\' day '\' Segments{indSens/2-1}], 'dir')
+                    mkdir([savedirname '\EMGtoLabel\' subject '\' day '\' Segments{indSens/2-1}])
                 end
 
-                writetable(Data,[dirname '\EMGtoLabel\' subject '\' day ...
+                writetable(Data,[savedirname '\EMGtoLabel\' subject '\' day ...
                     '\' Segments{indSens/2-1} '\' dataSavename])
             end
         end
