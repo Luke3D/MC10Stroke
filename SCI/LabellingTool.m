@@ -92,9 +92,11 @@ handles.pathname = pathname;
 set(handles.textFileLoaded,'string',[pathname,handles.filename,'.csv']);
 plot(handles.mainAxes,x,N(:,2),'b'); 
 EMG_RAW=[N(:,1) N(:,emg_index)];
+N=EMG_RAW;
 EMG(:,2)=abs(EMG_RAW(:,2));
 [B,A] = butter(1, 20/125, 'low');
 EMG(:,2)=filtfilt(B,A,EMG(:,2));
+
 
 plot(handles.mainAxes,x,EMG(:,2)*1000-3,'c');
 plot(handles.mainAxes,x,EMG_RAW(:,2)*100-2,'r');
@@ -184,7 +186,7 @@ end
 
 %xlswrite(file,dataMatrix); %WRITES XLS
 %WRITES CSV FILE
-dataMatrix = dataMatrix(:,1:10);     %remaining cols are emptyS
+dataMatrix = dataMatrix(:,1:4);     %remaining cols are emptyS
 dataTable = array2table(dataMatrix);
 writetable(dataTable,file,'WriteVariableNames',false)
 
