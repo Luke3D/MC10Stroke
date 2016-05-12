@@ -157,7 +157,7 @@ class BioStampRCIO(object):
         outFile.close()
                     
     def writeAccelData(self, filenameHeader, mode, recordings):
-        f="{}_Gyro.csv".format(filenameHeader)
+        f="{}_Accel.csv".format(filenameHeader)
         d = os.path.dirname(f)
         if not os.path.exists(d):
             os.makedirs(d)
