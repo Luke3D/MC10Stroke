@@ -71,7 +71,7 @@ class BioStampRC(object):
                                 except:
                                     annotationNumber= -1
                             outputName= input("Output folder: ")
-                            for val in range(0,annotationNumber):
+                            for val in range(0,annotationNumber+1):
                                 anno= annotationList[val]
                                 #print(anno.keys())
                                 sa= self.io.stringifyAnnotation(anno)

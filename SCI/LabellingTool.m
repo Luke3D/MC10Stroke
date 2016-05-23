@@ -143,12 +143,12 @@ locationSelect = get(handles.popupmenuLocation,'value');
 handles.data(m1:m2,handles.activityIndex) = activitySelect;
 handles.data(m1:m2,handles.locationIndex) = locationSelect;
 
-Env=handles.data(:,5);
+Env=handles.data(:,2);
 Env=abs(Env);
 [B,A] = butter(1, 20/125, 'low');
 Env=filtfilt(B,A,Env);
 
-plot(handles.mainAxes,(m1-1:m2-1)/250,Env(m1:m2)*10000-2,'color',handles.colors{activitySelect},...
+plot(handles.mainAxes,(m1-1:m2-1)/250,Env(m1:m2)*1000-3,'color',handles.colors{activitySelect},...
     'marker',handles.markerTypes{1},...
     'MarkerSize',1);
 
@@ -164,7 +164,7 @@ end
 activityList = get(handles.popupmenuActivity,'string');
 locationList = get(handles.popupmenuLocation,'string');
 file = ['Z:\Stroke MC10\SCI\LabeledEMG\',handles.pathname(31:end),...
-    locationList{get(handles.popupmenuLocation,'value')},'labeled.csv'];  %WRITES CSV
+    locationList{get(handles.popupmenuLocation,'value')},'_',handles.filename(1:end),'_','labeled.csv'];  %WRITES CSV
 dataMatrix = cell(size(handles.data,1),size(handles.data,2)+4);
 unlabeledNotice = 0;
 % for i = 1:size(handles.R,1)

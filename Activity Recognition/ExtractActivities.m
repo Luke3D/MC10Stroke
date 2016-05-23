@@ -12,7 +12,7 @@ Act_Labels=readtable('Z:\Stroke MC10\Activity Recognition\Labels.csv', 'ReadVari
 % hamFilenames=rdir('Z:\Stroke MC10\CS*\**\Hamstring\**\accel.csv');
 % hamFilenames={hamFilenames.name}.';
 
-parfor indLab=1:height(Act_Labels)
+for indLab=1:height(Act_Labels)
     
     startStamp=datetime(1970, 1, 1, 0, 0, Act_Labels.Var3(indLab)/1000);
     
@@ -48,6 +48,10 @@ parfor indLab=1:height(Act_Labels)
     end
     
     Subj=Subject_IDs{indM,1};
+    
+    if ~strcmp(Subj,'CS015')
+        continue
+    end
     
     gasFilenames=rdir(['Z:\Stroke MC10\' Subj '\' Day '\Gastrocnemius\**\accel.csv']);
     gasFilenames={gasFilenames.name}.';
