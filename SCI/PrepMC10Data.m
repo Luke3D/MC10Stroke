@@ -19,7 +19,7 @@ Locations={'HA','RF','GA','TA','HEEL','FOOT'};
 Segments={'Thigh' 'Shank'};
 
 % Identify Directories with Raw Subject Data
-subjnames=dir([dirname '\SCI*2']);
+subjnames=dir([dirname '\SCI*1']);
 Directories=cellfun(@(x) x==0, {subjnames.isdir});
 subjnames(Directories)=[];
 % Remove listed subjects from loop
