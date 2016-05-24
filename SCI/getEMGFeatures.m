@@ -62,7 +62,7 @@ for i=1:size(X,1)
 %     end
 %     
 %     %Sample Entropy
-    r = 0.2*std(x);    %tolerance = 0.2*std
+    r = 0.5*std(x);    %tolerance = 0.2*std
     fvec = [fvec SampEn(1,r,x.')];
     flab = [flab; '-SampEn'];
 %     
@@ -71,13 +71,13 @@ for i=1:size(X,1)
 
     N = length(x);
     xdft = fft(x,2^nextpow2(N));
-    xdft = xdft(1:N/2+1);
+    xdft = xdft(1:round(N/2)+1);
     psdx = abs(xdft).^2;
     freqx = linspace(0,Fs/2,length(psdx));
     l = length(freqx);
     for k = 1:6
-        fint = freqx((k-1)*l/6:k*l/6);
-        freqpow(k) = trapz(fint,psdx((k-1)*l/6:k*l/6))/trapz(freqx,psdx);
+        fint = freqx(round((k-1)*l/6+1):round(k*l/6));
+        freqpow(k) = trapz(fint,psdx(round((k-1)*l/6+1):round(k*l/6)))/trapz(freqx,psdx);
         fvec = [fvec freqpow(k)];    flab = [flab; ['-Fpow-', num2str(k*20)]];
     end
 

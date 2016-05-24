@@ -41,11 +41,11 @@ for indF=1:length(filenames)
         indStart=(indClip-1)*(clipSize-overlapSize)+1;
         indEnd=(indClip-1)*(clipSize-overlapSize)+clipSize;
         
-        SA=sum(cellfun(@(x) strcmp(x,'Spastic Activity'),table2cell(Data(indStart:indEnd,4))));
-        HA=sum(cellfun(@(x) strcmp(x,'Non-Spastic Activity'),table2cell(Data(indStart:indEnd,4))));
-        IA=sum(cellfun(@(x) strcmp(x,'Inactive'),table2cell(Data(indStart:indEnd,4))));
-        M=sum(cellfun(@(x) strcmp(x,'Misc'),table2cell(Data(indStart:indEnd,4))))...
-            +sum(cellfun(@(x) strcmp(x,'Not Labeled'),table2cell(Data(indStart:indEnd,4))));
+        SA=sum(cellfun(@(x) strcmp(x,'Spastic Activity'),table2cell(Data(indStart:indEnd,3))));
+        HA=sum(cellfun(@(x) strcmp(x,'Non-Spastic Activity'),table2cell(Data(indStart:indEnd,3))));
+        IA=sum(cellfun(@(x) strcmp(x,'Inactive'),table2cell(Data(indStart:indEnd,3))));
+        M=sum(cellfun(@(x) strcmp(x,'Misc'),table2cell(Data(indStart:indEnd,3))))...
+            +sum(cellfun(@(x) strcmp(x,'Not labeled'),table2cell(Data(indStart:indEnd,3))));
         
         % Assign most common label to clip
         if M>0
@@ -66,7 +66,7 @@ for indF=1:length(filenames)
 %         Features{indClip}=[getFeatures(ACC(indStart:indEnd,:).') getEMGFeatures(EMG(indStart:indEnd,:).',std(EMG)*.2) getEMGFeatures(EMG_env(indStart:indEnd).',std(EMG)*.2)];
         %combine raw emg features and emg envelope features
 %         Features{indClip-skips}=[getEMGFeatures_New(EMG(indStart:indEnd,:).',std(EMG)*.2) getEMGFeatures_New(EMG_env(indStart:indEnd).',std(EMG)*.2)];
-        Features{indClip-skips}= getEMGFeatures_New(EMG(indStart:indEnd,:).',std(EMG)*.2);
+        Features{indClip-skips}= getEMGFeatures(EMG(indStart:indEnd,:).');
 
     end
     Label(cellfun(@isempty,Label)==1)=[];
@@ -77,10 +77,10 @@ for indF=1:length(filenames)
     AllClips=struct('SubjID', 'CS004',  'ActivityLabel', Label, ...
         'Emg', EMG_all, 'SamplingT', 1000/Fs, 'ClipDur', clipLength, 'ClipOverlap', clipOverlap, 'RecordingDur', 0);
     
-    save([savepath filename '_Clips.mat'],'AllClips')
+    save([savepath '/' filename '_Clips.mat'],'AllClips')
     
     AllFeat=struct('SubjID', 'CS004',  'ActivityLabel', Label, 'Features', ...
         Features, 'SamplingT', 1000/Fs, 'ClipDur', clipLength, 'ClipOverlap', clipOverlap, 'RecordingDur', 0);
     
-    save([savepath filename '_Feat.mat'],'AllFeat')
+    save([savepath '/' filename '_Feat.mat'],'AllFeat')
 end

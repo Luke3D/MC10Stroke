@@ -1,7 +1,9 @@
 %% Viusualize Labeled Data
+
 colors = {'g','r','y','k'};
 Labels={'Non-Spastic Activity', 'Spastic Activity', 'Inactive', 'Misc'};
 useStitched=1; % flag to use stitched data
+DoPCA = 0;     %flag to compute PCA and plot
 
 [filename,pathname] = uigetfile('Z:\Stroke MC10\SCI\LabeledEMG\*.csv');
 
@@ -119,5 +121,23 @@ for c = 1:length(longestchunk)
 end
 
 %% Extract Clips and features from data
+if ~exist('f') || ~exist('lab')
+    f = []; lab = [];
+end
 
- 
+Features = load(['Z:\Stroke MC10\SCI\Clips\' pathname(31:end) filename(1:end-4) '_Feat.mat']);
+Features = Features.AllFeat;
+f = [f; cell2mat({Features(:).Features}')];
+lab = [lab;{Features(:).ActivityLabel}'];
+
+%% PCA
+if DoPCA
+   f(:,8) = []; %drop Sample Entropy
+   [coeff,score,latent,~,explained] = pca(f);
+   explained
+   figure, gscatter(score(:,1),score(:,2),lab)
+%    figure, hold on 
+%    scatter3(score(1:132,1),score(1:132,2),score(1:132,3))
+%    scatter3(score(133:end,1),score(133:end,2),score(133:end,3),'o','g')
+end
+
