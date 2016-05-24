@@ -1,12 +1,10 @@
 %Plot Acc and EMG from all tests
-subjname = 'SCI001';
+subjname = 'SCI002';
 dirname = ['Z:\Stroke MC10\SCI\EMGtoLabel\' subjname];
 days=dir(dirname); days(1:2)=[];
 dirname = [dirname '\' days.name '\'];
 filenames = dir([dirname 'Shank\*.csv']);
-selectedtest = {'SCATS Clonus'}%,'MAS-DF','MAS-PF','VCM-Knee','MVC-GA','MAS-KE','MAS-KF'};
-
-close all
+selectedtest = {'SCATS Extensor Spasms'}%,'MAS-DF','MAS-PF','VCM-Knee','MVC-GA','MAS-KE','MAS-KF'};
 
 for f = 1:length(filenames)
     shank = readtable([dirname 'Shank\' filenames(f).name]);

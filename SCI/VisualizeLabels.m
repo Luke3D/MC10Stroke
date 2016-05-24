@@ -100,12 +100,14 @@ for c = 1:length(longestchunk)
     ylabel('Magnitude')
     
     %scale PSD by fund freq of envelope
-    indf = find(freq > 1,1);
-    [~,fundfreq] = max(psdEnv(indf+1:end)); fundfreq = freq(fundfreq+indf);
-    figure
-    xscaled = freqx/fundfreq;
-    plot(xscaled,psdx);
+%     indf = find(freq > 1,1);
+%     [~,fundfreq] = max(psdEnv(indf+1:end)); fundfreq = freq(fundfreq+indf);
+%     figure
+%     xscaled = freqx/fundfreq;
+%     plot(xscaled,psdx);
     
 end
 
+%% Extract Clips and features from data
 
+ 
