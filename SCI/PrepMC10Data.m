@@ -8,7 +8,7 @@
 clear all
 
 Fs=250; % Sampling Frequency of EMG
-HPF=10; % Frequency for High-Pass filter on EMG data (Hz)
+HPF=20; % Frequency for High-Pass filter on EMG data (Hz)
 % Subjects to exclude from loop
 RemoveSub={};
 
@@ -19,7 +19,7 @@ Locations={'HA','RF','GA','TA','HEEL','FOOT'};
 Segments={'Thigh' 'Shank'};
 
 % Identify Directories with Raw Subject Data
-subjnames=dir([dirname '\SCI*1']);
+subjnames=dir([dirname '\NST*']);
 Directories=cellfun(@(x) x==0, {subjnames.isdir});
 subjnames(Directories)=[];
 % Remove listed subjects from loop

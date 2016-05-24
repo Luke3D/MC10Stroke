@@ -10,7 +10,7 @@ fvec = []; %stores features
 flab = {}; %stores names of features
 %axes = {'x','y','z'};
 epsthresh = 1E-5;  %threshold to be tuned based on the peak noise amp
-fs = 250;           %Sampling Freq [Hz]
+Fs = 250;           %Sampling Freq [Hz]
 
 %% Features for Each Channel (Time Domain)
 for i=1:size(X,1)
@@ -66,7 +66,24 @@ for i=1:size(X,1)
     fvec = [fvec SampEn(1,r,x.')];
     flab = [flab; '-SampEn'];
 %     
+
+%% Freq domain features
+
+    N = length(x);
+    xdft = fft(x,2^nextpow2(N));
+    xdft = xdft(1:N/2+1);
+    psdx = abs(xdft).^2;
+    freqx = linspace(0,Fs/2,length(psdx));
+    l = length(freqx);
+    for k = 1:6
+        fint = freqx((k-1)*l/6:k*l/6);
+        freqpow(k) = trapz(fint,psdx((k-1)*l/6:k*l/6))/trapz(freqx,psdx);
+        fvec = [fvec freqpow(k)];    flab = [flab; ['-Fpow-', num2str(k*20)]];
+    end
+
+    
 end
+
 
 % %% Frequency Domain Processing (High Pass + Power Spectra)
 % filtered = cell(1,1);
