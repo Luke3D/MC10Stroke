@@ -1,6 +1,7 @@
 %% Viusualize Labeled Data
 colors = {'g','r','y','k'};
 Labels={'Non-Spastic Activity', 'Spastic Activity', 'Inactive', 'Misc'};
+useStitched=1; % flag to use stitched data
 
 [filename,pathname] = uigetfile('Z:\Stroke MC10\SCI\LabeledEMG\*.csv');
 
@@ -31,6 +32,13 @@ for indLab=1:length(Labels)
         %save each longest record of labeled data for analysis
         [~,indlongest] = max(diff(sepInds));
         longestchunk{indLab} = labelData(sepInds(indlongest)+1:sepInds(indlongest+1),:);
+    end
+    stitched=[];
+    for i=1:length(sepInds)-1
+        stitched=[stitched; labelData(sepInds(i)+1:sepInds(i+1),:)];
+    end
+    if useStitched
+        longestchunk{indLab}=stitched;
     end
 end
 
@@ -72,11 +80,13 @@ for c = 1:length(longestchunk)
     t = 0:1/Fs:length(x)/Fs-1/Fs; plot(t,x,colors{indLab}), xlabel('Time [s]')
     ylim([-1E-4 1E-4]), ylabel('EMG [V]')
     subplot(412), hold on
-    plot(freqx,psdx)
+    plot(freqx,psdx/trapz(freqx,psdx))
     grid on
     title('PSD')
     xlabel('Frequency (Hz)')
     ylabel('Magnitude')
+    
+    trapz(freqx(1:20/125*length(psdx)),psdx(1:20/125*length(psdx))/trapz(freqx,psdx))
     
     %envelope
     Env =abs(x); Env = Env-mean(Env);

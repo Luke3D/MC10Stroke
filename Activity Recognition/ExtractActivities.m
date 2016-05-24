@@ -49,10 +49,6 @@ for indLab=1:height(Act_Labels)
     
     Subj=Subject_IDs{indM,1};
     
-    if ~strcmp(Subj,'CS015')
-        continue
-    end
-    
     gasFilenames=rdir(['Z:\Stroke MC10\' Subj '\' Day '\Gastrocnemius\**\accel.csv']);
     gasFilenames={gasFilenames.name}.';
     hamFilenames=rdir(['Z:\Stroke MC10\' Subj '\' Day '\Hamstring\**\accel.csv']);
@@ -159,7 +155,7 @@ for indLab=1:height(Act_Labels)
         tStart=hamData(1,1);
     end
     
-    if hamData(end,1)<gasData(end,1)
+    if hamData(end,1)>gasData(end,1)
         tEnd=gasData(end,1);
     else
         tEnd=hamData(end,1);
@@ -171,7 +167,7 @@ for indLab=1:height(Act_Labels)
         tStart_EMG=hamEMG(1,1);
     end
     
-    if hamEMG(end,1)<gasEMG(end,1)
+    if hamEMG(end,1)>gasEMG(end,1)
         tEnd_EMG=gasEMG(end,1);
     else
         tEnd_EMG=hamEMG(end,1);
