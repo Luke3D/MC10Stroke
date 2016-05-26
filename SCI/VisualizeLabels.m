@@ -135,7 +135,7 @@ if DoPCA
    f(:,8) = []; %drop Sample Entropy
    [coeff,score,latent,~,explained] = pca(f);
    explained
-   figure, gscatter(score(:,1),score(:,2),lab)
+   figure, gscatter(score(:,1),score(:,2),lab,'rg')
 %    figure, hold on 
 %    scatter3(score(1:132,1),score(1:132,2),score(1:132,3))
 %    scatter3(score(133:end,1),score(133:end,2),score(133:end,3),'o','g')
