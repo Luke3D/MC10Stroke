@@ -2,8 +2,8 @@
 % Copy section form annotation csv with StartTime(utc) EndTime(utc) and
 % Label into Times variable before running
 
-Subj='NickTest';
-Day='1';
+Subj='CS029';
+Day='2';
 
 QuestionInd=cellfun(@(x) strcmp(x(1:9),'ActivityQ'),Times.Label);
 Times(QuestionInd,:)=[];

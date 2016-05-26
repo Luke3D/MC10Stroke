@@ -1,147 +1,160 @@
 % Returns features for EMG data
 
-function [fvec, flab] = getEMGFeatures(emg,r)
-% INPUT acc - 1 x n vector: 1-3 are xyz accelerations for n data points
-%       r - threshold for SampEn
+function [fvec, flab] = getEMGFeatures(emg)
 
-S = emg(1,:); %matrix of xyz acceleration data (excludes time data)
+%r - threshold for SampEn
 
-ii=1;
+X = emg(1,:); %EMG channels
 
 fvec = []; %stores features
 flab = {}; %stores names of features
-axes = {'x','y','z'};
+%axes = {'x','y','z'};
+epsthresh = 1E-5;  %threshold to be tuned based on the peak noise amp
+Fs = 250;           %Sampling Freq [Hz]
 
-%% Features for Each Axis (Time Domain)
-for i=1:size(S,1)
-    %Mean 
-    fvec = [fvec nanmean(S(i,:))]; flab = [flab; [axes{i} '-mean']];
+%% Features for Each Channel (Time Domain)
+for i=1:size(X,1)
+    
+    x = X(i,:);
+    
+    %Mean Absolute value
+    fvec = [fvec nanmean(abs(x(i,:)))]; flab = [flab; [num2str(i) '-MeanAbs']];
+    
+    %Zero Crossings
+    diffxk = diff(x(i,:));
+    sgnxk = diffxk(1:end-1).*diffxk(2:end);
+    ind0 = find(abs(diffxk) > epsthresh & diffxk < 0);
+    ZC = length(ind0)/length(x);
+    fvec = [fvec ZC]; flab = [flab; [num2str(i) '-ZeroCross']];
+    
+    %Slope Sign Changes
+    xk = x(2:end-1); xkm1 = x(1:end-2); xkp1 = x(3:end);
+    SC_a = xk>xkm1 & xk>xkp1;
+    SC_b = xk<xkm1 & xk<xkp1;
+    SC_c = (abs(xk-xkm1) >= epsthresh) | (abs(xk-xkp1) >= epsthresh);
+    SC = find( (SC_a | SC_b) & SC_c);
+    SC = length(SC)/length(x);
+    fvec = [fvec SC]; flab = [flab; [num2str(i) '-SlopeSignChange']];
+    
+    %Waveform length
+    WL = mean(abs(xk-xkp1));
+    fvec = [fvec WL]; flab = [flab; [num2str(i) '-WaveformLength']];
+    
+    %Willison Amplitude
+    f = (abs(xk-xkp1) > epsthresh);
+    WAMP = sum(f)/length(x);
+    fvec = [fvec WAMP]; flab = [flab; [num2str(i) '-WillisonAmp']];
+    
+    %RMS
+    RMS = sqrt(mean(x.^2));
+    fvec = [fvec RMS]; flab = [flab; [num2str(i) '-RMS']];
+    
+    %Variance
+    VAR = var(x);
+    fvec = [fvec VAR]; flab = [flab; [num2str(i) '-Variance']];
+    
+%     %AR coefficients (4th order)
+%     AR_model = ar(x,4,'Ts',fs);
+%     AR_coeffs = AR_model.a(2:end);
+%     fvec = [fvec AR_coeffs];
+%     for j = 1:length(AR_Coeffs)
+%         flab = [flab; [axes{i} sprintf('-ARCoeff%d',j)]];
+%     end
+%     
+%     %Sample Entropy
+    r = 0.5*std(x);    %tolerance = 0.2*std
+    fvec = [fvec SampEn(1,r,x.')];
+    flab = [flab; '-SampEn'];
+%     
 
-    %Range of values
-    fvec = [fvec range(S(i,:))]; flab = [flab; [axes{i} '-range']];
-    
-    %Interquartile Range
-    fvec = [fvec iqr(S(i,:))]; flab = [flab; [axes{i} '-IQR']];    
-    
-    %Histogram of the z-score values
-    zvals = -2:1:2;
-    histvec = histc((S(i,:)-nanmean(S(i,:))/nanstd(S(i,:))),zvals);
-    histvec = histvec(1:end-1); % removing the last data point which counts how many values match exactly 3. (nonsense)
-    fvec = [fvec histvec]; 
-    for j=1:length(histvec),
-        flab = [flab; [axes{i} sprintf('-hist%d',zvals(j))]];
+%% Freq domain features
+
+    N = length(x);
+    xdft = fft(x,2^nextpow2(N));
+    xdft = xdft(1:round(N/2)+1);
+    psdx = abs(xdft).^2;
+    freqx = linspace(0,Fs/2,length(psdx));
+    l = length(freqx);
+    for k = 1:6
+        fint = freqx(round((k-1)*l/6+1):round(k*l/6));
+        freqpow(k) = trapz(fint,psdx(round((k-1)*l/6+1):round(k*l/6)))/trapz(freqx,psdx);
+        fvec = [fvec freqpow(k)];    flab = [flab; ['-Fpow-', num2str(k*20)]];
     end
+
     
-    %Std (2nd moment)
-    fvec = [fvec nanstd(S(i,:))];  flab = [flab; [axes{i} '-std']];
-    
-    %Skewness + Kurtosis (3rd and 4th moments)
-    if nanstd(S(i,:)) == 0
-        X = S(i,:); N = length(X);
-        s = 1/N*sum((X-mean(X)).^3)/( sqrt(1/N*sum((X-mean(X)).^2)) + eps )^3; %skewness
-        k = 1/N*sum((X-mean(X)).^4)/( 1/N*sum((X-mean(X)).^2) + eps )^2; %kurtosis
-        fvec = [fvec s]; flab = [flab; [axes{i} '-skew']];
-        fvec = [fvec k]; flab = [flab; [axes{i} '-kurt']];
-    else
-        fvec = [fvec skewness(S(i,:))]; flab = [flab; [axes{i} '-skew']];
-        fvec = [fvec kurtosis(S(i,:))]; flab = [flab; [axes{i} '-kurt']];
-    end
-     
-    %Mean of differences
-    fvec = [fvec nanmean(diff(S(i,:)))]; flab = [flab; [axes{i} '-mean diff']];
-    
-    %Std of differences (2nd moment)
-    fvec = [fvec nanstd(diff(S(i,:)))]; flab = [flab; [axes{i} '-std diff']];
-    
-    %Skewness + Kurtosis of differences (3rd and 4th moments)
-    if nanstd(diff(S(i,:))) == 0
-        X = diff(S(i,:)); N = length(X);
-        s = 1/N*sum((X-mean(X)).^3)/( sqrt(1/N*sum((X-mean(X)).^2)) + eps )^3; %skewness
-        k = 1/N*sum((X-mean(X)).^4)/( 1/N*sum((X-mean(X)).^2) + eps )^2; %kurtosis 
-        fvec = [fvec s]; flab = [flab; [axes{i} '-skew diff']];
-        fvec = [fvec k]; flab = [flab; [axes{i} '-kurt diff']];
-    else
-        fvec = [fvec skewness(diff(S(i,:)))]; flab = [flab; [axes{i} '-skew diff']];
-        fvec = [fvec kurtosis(diff(S(i,:)))]; flab = [flab; [axes{i} '-kurt diff']];
-    end
 end
 
-%% Features Across All Axes (Time Domain)
-%Mean of squares
-fvec = [fvec nanmean(nanmean(S.^2))];
-flab = [flab; 'mean of squares'];
 
-%% Frequency Domain Processing (High Pass + Power Spectra)
-filtered = cell(1,1);
-PSD_welch = cell(1,1);
-f_welch = cell(1,1);
-fc = 0.2; %cutoff frequency (Hz)
-fs = 250;
-f_nyq = fs/2;
+% %% Frequency Domain Processing (High Pass + Power Spectra)
+% filtered = cell(1,1);
+% PSD_welch = cell(1,1);
+% f_welch = cell(1,1);
+% fc = 0.2; %cutoff frequency (Hz)
+% fs = 250;
+% f_nyq = fs/2;
+% 
+% %High Pass Filter
+% 
+% [b, a] = butter(2,(fc*pi)/f_nyq,'high');
+% filtered{ii} = filter(b,a,x(ii,:));
+% 
+% 
+% %Power Spectra
+% 
+% win_size = ceil(length(filtered{ii})/2);
+% [PSD_welch{ii}, f_welch{ii}] = pwelch(filtered, win_size, [], [], fs);
+% 
+% 
+% %% Features for Each Axis (Frequency Domain)
+% 
+% %Mean
+% fvec = [fvec nanmean(PSD_welch{ii})]; flab = [flab; [axes{ii} '-mean (PSD)']];
+% 
+% %Std (2nd moment)
+% fvec = [fvec nanstd(PSD_welch{ii})];  flab = [flab; [axes{ii} '-std (PSD)']];
+% 
+% %Skewness + Kurtosis (3rd and 4th moments)
+% if nanstd(PSD_welch{ii}) == 0
+%     x = PSD_welch{ii}; N = length(x);
+%     s = 1/N*sum((x-mean(x)).^3)/( sqrt(1/N*sum((x-mean(x)).^2)) + eps )^3; %skewness
+%     k = 1/N*sum((x-mean(x)).^4)/( 1/N*sum((x-mean(x)).^2) + eps )^2; %kurtosis
+%     fvec = [fvec s]; flab = [flab; [axes{ii} '-skew (PSD)']];
+%     fvec = [fvec k]; flab = [flab; [axes{ii} '-kurt (PSD)']];
+% else
+%     fvec = [fvec skewness(PSD_welch{ii})]; flab = [flab; [axes{ii} '-skew (PSD)']];
+%     fvec = [fvec kurtosis(PSD_welch{ii})]; flab = [flab; [axes{ii} '-kurt (PSD)']];
+% end
+% 
+% %Mean Power for 0.5 Hz Intervals
+% bins = [0:5:125]; %0-125 Hz with bins for every 0.5 Hz
+% N = length(bins)-1;
+% bin_ind = [1; zeros(N,1)];
+% %PSD_welch_norm = PSD_welch{ii}/max(PSD_welch{ii});
+% PSD_welch_norm = PSD_welch{ii};
+% bin_val = zeros(N,1);
+% for jj = 1:length(bins) %ignore 0 Hz in bins vector
+%     freq_bin = bins(jj);
+%     for zz = 1:length(f_welch{ii})
+%         if ((f_welch{ii}(max(zz-1,1)) < freq_bin) && (f_welch{ii}(zz) > freq_bin)) || f_welch{ii}(zz) == freq_bin
+%             bin_ind(jj) = zz;
+%         end
+%     end
+% end
+% 
+% for kk = 1:length(bins)
+%     bin_val(kk) = mean(PSD_welch_norm(bin_ind(max(kk-1,1)):bin_ind(kk)));
+% end
+% fvec = [fvec bin_val(1:end)'];
+% for jj = 1:length(bin_val)
+%     flab = [flab; [axes{ii} sprintf('_bin_%d',bins(jj))]];
+% end
+% 
+% fvec = [fvec sum(bin_val(1:4))/sum(bin_val(5:end))];
+% flab = [flab; 'f_ratio'];
+% 
+% %% Features Across All Axes (Frequency Domain)
+% %Sum of std
+% 
 
-%High Pass Filter
-
-    [b, a] = butter(2,(fc*pi)/f_nyq,'high');
-    filtered{ii} = filter(b,a,S(ii,:)); 
-
-
-%Power Spectra
-
-    win_size = ceil(length(filtered{ii})/2);
-    [PSD_welch{ii}, f_welch{ii}] = pwelch(filtered, win_size, [], [], fs);
-
-
-%% Features for Each Axis (Frequency Domain)
-
-    %Mean 
-    fvec = [fvec nanmean(PSD_welch{ii})]; flab = [flab; [axes{ii} '-mean (PSD)']];
-    
-    %Std (2nd moment)
-    fvec = [fvec nanstd(PSD_welch{ii})];  flab = [flab; [axes{ii} '-std (PSD)']];
-    
-    %Skewness + Kurtosis (3rd and 4th moments)
-    if nanstd(PSD_welch{ii}) == 0
-        X = PSD_welch{ii}; N = length(X);
-        s = 1/N*sum((X-mean(X)).^3)/( sqrt(1/N*sum((X-mean(X)).^2)) + eps )^3; %skewness
-        k = 1/N*sum((X-mean(X)).^4)/( 1/N*sum((X-mean(X)).^2) + eps )^2; %kurtosis
-        fvec = [fvec s]; flab = [flab; [axes{ii} '-skew (PSD)']];
-        fvec = [fvec k]; flab = [flab; [axes{ii} '-kurt (PSD)']];
-    else
-        fvec = [fvec skewness(PSD_welch{ii})]; flab = [flab; [axes{ii} '-skew (PSD)']];
-        fvec = [fvec kurtosis(PSD_welch{ii})]; flab = [flab; [axes{ii} '-kurt (PSD)']];
-    end
-    
-    %Mean Power for 0.5 Hz Intervals
-    bins = [0:5:125]; %0-125 Hz with bins for every 0.5 Hz
-    N = length(bins)-1;
-    bin_ind = [1; zeros(N,1)];
-    %PSD_welch_norm = PSD_welch{ii}/max(PSD_welch{ii});
-    PSD_welch_norm = PSD_welch{ii};
-    bin_val = zeros(N,1);
-    for jj = 1:length(bins) %ignore 0 Hz in bins vector
-        freq_bin = bins(jj);
-        for zz = 1:length(f_welch{ii})
-           if ((f_welch{ii}(max(zz-1,1)) < freq_bin) && (f_welch{ii}(zz) > freq_bin)) || f_welch{ii}(zz) == freq_bin
-               bin_ind(jj) = zz;
-           end
-        end
-    end
-
-    for kk = 1:length(bins)
-        bin_val(kk) = mean(PSD_welch_norm(bin_ind(max(kk-1,1)):bin_ind(kk)));
-    end
-    fvec = [fvec bin_val(1:end)'];
-    for jj = 1:length(bin_val)
-        flab = [flab; [axes{ii} sprintf('_bin_%d',bins(jj))]];
-    end
-    
-    fvec = [fvec sum(bin_val(1:4))/sum(bin_val(5:end))];
-    flab = [flab; 'f_ratio'];
-
-%% Features Across All Axes (Frequency Domain)
-%Sum of std
-
-fvec = [fvec SampEn(1,r,S.')];
-flab = [flab; 'SampEn'];
 
 return

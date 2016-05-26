@@ -10,11 +10,11 @@ Activities={'Lying' 'Sitting' 'Standing' 'Stairs Up' 'Stairs Down' 'Walking'};
 Set={'Train' 'Test'};
 for indSet=1:length(Set)
     
-    filenames=dir([dirname 'RawData\' Set{indSet} '\*.csv']);
+    filenames=dir([dirname 'RawData\' Set{indSet} '\ACC\*.csv']);
 
     for indFile=1:length(filenames)
-        Data=csvread([dirname 'RawData\' Set{indSet} '\' filenames(indFile).name]);
-        EMG=csvread([dirname 'RwaData\' Set{indSet} '\' filenames(indFile).name(1:end-4) 'afe.csv']);
+        Data=csvread([dirname 'RawData\' Set{indSet} '\ACC\' filenames(indFile).name]);
+        EMG=csvread([dirname 'RawData\' Set{indSet} '\EMG\' filenames(indFile).name(1:end-4) '_EMG.csv']);
         name=strsplit(filenames(indFile).name,'_');
         Activity=name{2};  
         ind=find(strcmp(Activity,Activities)==1);

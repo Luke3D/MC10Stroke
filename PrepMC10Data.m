@@ -7,14 +7,14 @@
 clear all
 
 Fs=250; % Sampling Frequency
-HPF=3; % Frequency for High-Pass filter on EMG data
+HPF=10; % Frequency for High-Pass filter on EMG data
 initBuff=3000;
 % Subjects to exclude from loop
-% RemoveSub={'CS001', 'CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007', 'CS008', 'CS009', 'CS011', 'CS012', 'CS013', 'CS014', 'CS015'};
-RemoveSub={};
+RemoveSub={'CS001', 'CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007', 'CS008', 'CS009', 'CS011', 'CS012'};
+% RemoveSub={};
 dirname='Z:\Stroke MC10\';
-% Locations={'Gastrocnemius' 'Hamstring'};
-Locations={'Medial Chest'};
+Locations={'Gastrocnemius' 'Hamstring'};
+% Locations={'Medial Chest'};
 
 % Identify Directories with Raw Subject Data
 filenames=dir([dirname 'CS*']);
@@ -38,7 +38,7 @@ for indDir=1:length(filenames)
         end
         load([dirname subject '\Lab Day ' numDay '\' subject '_Day' numDay '_Times.mat'])
     % Loop through activity list in Times
-    parfor i=1:height(Times)
+    for i=1:height(Times)
         for indLoc=1:length(Locations)
             startStamp=datetime(1970, 1, 1, 0, 0, Times.Start(i)/1000);
 
@@ -57,16 +57,27 @@ for indDir=1:length(filenames)
             % Multiple data recordings may be present
             % Find index of correct recording file
             ind=find(startStamp>fileStamp==0,1);
+            
             if ind>1
                 ind=ind-1;
             end
             if isempty(ind)
                 ind=length(datafiles);
             end
-
+            if ind==0
+                continue
+            end
+            
+            
             % Load EMG data
-            afe=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
-                '\' datafiles(ind).name '\sensors\afe.csv']);
+            if exist([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
+                '\' datafiles(ind).name '\sensors\afe.csv'],'file')
+                afe=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
+                    '\' datafiles(ind).name '\sensors\afe.csv']);
+            else
+                afe=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
+                    '\' datafiles(ind).name '\sensors\emg.csv']);               
+            end
             % Only load accel data from Gastrocs
             if strcmp(Locations{indLoc},'Gastrocnemius')
                 accel=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
@@ -119,7 +130,7 @@ for indDir=1:length(filenames)
                 ACC=ham_acc(Start:Stop,:);
                 ACC(:,1)=(ACC(:,1))/1000;
 
-                t=min(EMG(:,1)):0.02:max(EMG(:,1));
+                t=min(EMG(:,1)):0.004:max(EMG(:,1));
                 ACC=spline(ACC(:,1).', ACC(:,2:end).', t.');
                 ACC=[t.' ACC.'];
                 if ~strcmp(Locations{indLoc},'Medial Chest')
@@ -132,8 +143,8 @@ for indDir=1:length(filenames)
             saveName=[dirname 'PreppedData\' subject '\Lab Day' num2str(Day) '\' Locations{indLoc} ...
                 '_' X '_emgData.csv'];
             
-            accName=[dirname '6MWT ACC\' subject '_Day' num2str(Day) ...
-                '_' X '_accData.csv'];
+%             accName=[dirname '6MWT ACC\' subject '_Day' num2str(Day) ...
+%                 '_' X '_accData.csv'];
 
             if ~exist([dirname 'PreppedData\' subject], 'dir')
                 mkdir([dirname 'PreppedData\' subject])
@@ -143,7 +154,7 @@ for indDir=1:length(filenames)
             end
 
             dlmwrite(saveName,Data,'delimiter',',','precision',13)
-            dlmwrite(accName,ACC,'delimiter',',','precision',13)
+%             dlmwrite(accName,ACC,'delimiter',',','precision',13)
         end
     end
     end

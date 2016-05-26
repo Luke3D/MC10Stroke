@@ -6,13 +6,13 @@ clear all
 
 load 'Z:\Stroke MC10\MC10Sessions.mat'
 
-Act_Labels=readtable('Z:\Stroke MC10\Activity Recognition\Labels.csv', 'ReadVariableNames', false, 'Delimiter', '\t');
+Act_Labels=readtable('Z:\Stroke MC10\Activity Recognition\Labels_stroke.csv', 'ReadVariableNames', false, 'Delimiter', ',');
 % gasFilenames=rdir('Z:\Stroke MC10\CS*\**\Gastrocnemius\**\accel.csv');
 % gasFilenames={gasFilenames.name}.';
 % hamFilenames=rdir('Z:\Stroke MC10\CS*\**\Hamstring\**\accel.csv');
 % hamFilenames={hamFilenames.name}.';
 
-for indLab=1:height(Act_Labels)
+for indLab=1:1400%height(Act_Labels)
     
     startStamp=datetime(1970, 1, 1, 0, 0, Act_Labels.Var3(indLab)/1000);
     
@@ -93,7 +93,11 @@ for indLab=1:height(Act_Labels)
     end
     
     gasData=csvread(gasFilenames{gasI(ind)},1,0);
-    gasEMG=csvread([gasFilenames{gasI(ind)}(1:end-9) 'afe.csv'],1,0);
+    if exist([gasFilenames{gasI(ind)}(1:end-9) 'afe.csv'],'file')
+        gasEMG=csvread([gasFilenames{gasI(ind)}(1:end-9) 'afe.csv'],1,0);
+    else
+        gasEMG=csvread([gasFilenames{gasI(ind)}(1:end-9) 'emg.csv'],1,0);
+    end
     
     name=gasFilenames{ind};
     if str2double(name(30))==1
@@ -130,7 +134,11 @@ for indLab=1:height(Act_Labels)
     end
     
     hamData=csvread(hamFilenames{hamI(ind)},1,0);
-    hamEMG=csvread([hamFilenames{hamI(ind)}(1:end-9) 'afe.csv'],1,0);
+    if exist([hamFilenames{hamI(ind)}(1:end-9) 'afe.csv'],'file')
+        hamEMG=csvread([hamFilenames{hamI(ind)}(1:end-9) 'afe.csv'],1,0);
+    else
+        hamEMG=csvread([hamFilenames{hamI(ind)}(1:end-9) 'emg.csv'],1,0);
+    end
     
     [~,Start]=min(abs(hamData(:,1)-Act_Labels.Var3(indLab)));
     [~,Stop]=min(abs(hamData(:,1)-Act_Labels.Var4(indLab)));
@@ -173,6 +181,18 @@ for indLab=1:height(Act_Labels)
         tEnd_EMG=hamEMG(end,1);
     end
     
+    if tEnd_EMG<tEnd
+        tStart=tStart_EMG;
+    else
+        tStart_EMG=tStart;
+    end
+    
+    if tEnd_EMG<tEnd
+        tEnd=tEnd_EMG;
+    else
+        tEnd_EMG=tEnd;
+    end
+    
     % Resample to 50 Hz to time normalize
     gasData=[tStart:1000/50:tEnd; spline(gasData(:,1).',gasData(:,2:end).',tStart:1000/50:tEnd)].';
     hamData=[tStart:1000/50:tEnd; spline(hamData(:,1).',hamData(:,2:end).',tStart:1000/50:tEnd)].';
@@ -186,8 +206,8 @@ for indLab=1:height(Act_Labels)
     Act=Act_Labels.Var5(indLab);
     num=Act_Labels.Var1(indLab);
     
-    dlmwrite(['Z:\Stroke MC10\Activity Recognition\RawData\' Day '\ACC\' Subj '_' Act{1} '_' num2str(num) '.csv'], Data, 'Precision', 12)
-    dlmwrite(['Z:\Stroke MC10\Activity Recognition\RawData\' Day '\EMG\' Subj '_' Act{1} '_' num2str(num) '_EMG.csv'], EMG, 'Precision', 12)
+    dlmwrite(['Z:\Stroke MC10\Activity Recognition\RawData\' Day '\ACC\' Subj '_' Act{1} '_' num2str(num) '.csv'], Data, 'Precision', 14)
+    dlmwrite(['Z:\Stroke MC10\Activity Recognition\RawData\' Day '\EMG\' Subj '_' Act{1} '_' num2str(num) '_EMG.csv'], EMG, 'Precision', 14)
 end
   
     

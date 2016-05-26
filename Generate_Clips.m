@@ -6,17 +6,7 @@
 
 clear all
 
-Loc='Ham';
-
-filenames=rdir(['Z:\Stroke MC10\LabeledData\**\' Loc '*.csv']);
-if strcmp(Loc,'Ham')
-    activityLoc=9;
-    accLoc=6;
-end
-if strcmp(Loc,'Gas')
-    activityLoc=6;
-    accLoc=2;
-end
+filenames=rdir('Z:\Stroke MC10\LabeledData\**\*.csv');
 
 clipLength=.5;
 Fs=250;
@@ -25,12 +15,21 @@ clipOverlap=.75;
 clipSize=ceil(clipLength*Fs);
 overlapSize=ceil(clipOverlap*clipSize);
 
-
-for indFile=1:length(filenames)
-    Data=readtable(filenames(indFile).name,'ReadVariableNames',false);
+for indF=1:length(filenames)
+    Data=readtable(filenames(indF).name,'ReadVariableNames',false);
+    [savepath,filename,~]=fileparts(['Z:\Stroke MC10\Clips\' filenames(indF).name(31:end)]);
+    if ~exist(savepath,'dir')
+        mkdir(savepath)
+    end
     
-    EMG=cell2mat(table2cell(Data(:,5)));
-    ACC=cell2mat(table2cell(Data(:,accLoc:accLoc+2)));
+    if strfind(filename,'Hamstring')
+        indLab=9;
+    else
+        indLab=6;
+    end
+    
+    EMG=cell2mat(table2cell(Data(:,2)));
+%     ACC=cell2mat(table2cell(Data(:,accLoc:accLoc+2)));
     EMG_env=abs(EMG);
     [B,A] = butter(1, 15/125, 'low');
     EMG_env=filtfilt(B,A,EMG_env);
@@ -48,10 +47,11 @@ for indFile=1:length(filenames)
         indStart=(indClip-1)*(clipSize-overlapSize)+1;
         indEnd=(indClip-1)*(clipSize-overlapSize)+clipSize;
         
-        SA=sum(cellfun(@(x) strcmp(x,'Spastic Activity'),table2cell(Data(indStart:indEnd,activityLoc))));
-        HA=sum(cellfun(@(x) strcmp(x,'Non-Spastic Activity'),table2cell(Data(indStart:indEnd,activityLoc))));
-        IA=sum(cellfun(@(x) strcmp(x,'Inactive'),table2cell(Data(indStart:indEnd,activityLoc))));
-        M=sum(cellfun(@(x) strcmp(x,'Misc'),table2cell(Data(indStart:indEnd,activityLoc))));
+        SA=sum(cellfun(@(x) strcmp(x,'Spastic Activity'),table2cell(Data(indStart:indEnd,indLab))));
+        HA=sum(cellfun(@(x) strcmp(x,'Non-Spastic Activity'),table2cell(Data(indStart:indEnd,indLab))));
+        IA=sum(cellfun(@(x) strcmp(x,'Inactive'),table2cell(Data(indStart:indEnd,indLab))));
+        M=sum(cellfun(@(x) strcmp(x,'Misc'),table2cell(Data(indStart:indEnd,indLab))))...
+            +sum(cellfun(@(x) strcmp(x,'Not labeled'),table2cell(Data(indStart:indEnd,indLab))));
         
         % Assign most common label to clip
         if M>0
@@ -68,7 +68,6 @@ for indFile=1:length(filenames)
         end
         
         EMG_all{indClip-skips}=EMG(indStart:indEnd,:);
-        ACC_all{indClip-skips}=ACC(indStart:indEnd,:);
         
 %         Features{indClip}=[getFeatures(ACC(indStart:indEnd,:).') getEMGFeatures(EMG(indStart:indEnd,:).',std(EMG)*.2) getEMGFeatures(EMG_env(indStart:indEnd).',std(EMG)*.2)];
         %combine raw emg features and emg envelope features
@@ -77,19 +76,17 @@ for indFile=1:length(filenames)
 
     end
     Label(cellfun(@isempty,Label)==1)=[];
-    ACC_all(cellfun(@isempty,ACC_all)==1)=[];
     EMG_all(cellfun(@isempty,EMG_all)==1)=[];
     Features(cellfun(@isempty,Features)==1)=[];
     % Save data structures
     
-    AllClips=struct('SubjID', 'CS004',  'ActivityLabel', Label, 'Acc', ACC_all, ...
+    AllClips=struct('SubjID', 'CS001',  'ActivityLabel', Label, ...
         'Emg', EMG_all, 'SamplingT', 1000/Fs, 'ClipDur', clipLength, 'ClipOverlap', clipOverlap, 'RecordingDur', 0);
     
-    save([filenames(indFile).name(1:end-11) 'Clips.mat'],'AllClips')
+    save([savepath '/' filename(1:end-7) 'Clips.mat'],'AllClips')
     
-    AllFeat=struct('SubjID', 'CS004',  'ActivityLabel', Label, 'Features', ...
+    AllFeat=struct('SubjID', 'CS001',  'ActivityLabel', Label, 'Features', ...
         Features, 'SamplingT', 1000/Fs, 'ClipDur', clipLength, 'ClipOverlap', clipOverlap, 'RecordingDur', 0);
     
-    save([filenames(indFile).name(1:end-11) 'Feat.mat'],'AllFeat')
-    
+    save([savepath '/' filename(1:end-7) 'Feat.mat'],'AllFeat')
 end
