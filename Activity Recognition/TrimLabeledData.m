@@ -2,6 +2,9 @@
 close all
 clear all
 
+HPF=10;
+Fs=250;
+
 Cliplen=100;
 ClipOverlap=.5;
 ax=2;
@@ -15,6 +18,10 @@ for indSet=1:length(Set)
     for indFile=1:length(filenames)
         Data=csvread([dirname 'RawData\' Set{indSet} '\ACC\' filenames(indFile).name]);
         EMG=csvread([dirname 'RawData\' Set{indSet} '\EMG\' filenames(indFile).name(1:end-4) '_EMG.csv']);
+        
+        [B,A] = butter(1, HPF*2/Fs, 'high');
+        EMG(:,2:end)=filtfilt(B,A,EMG(:,2:end));
+        
         name=strsplit(filenames(indFile).name,'_');
         Activity=name{2};  
         ind=find(strcmp(Activity,Activities)==1);
@@ -71,7 +78,7 @@ for indSet=1:length(Set)
 
             newData=Data(Start*ClipOverlap*Cliplen:End*ClipOverlap*Cliplen,:);
             tStart=newData(1,1); tEnd=newData(end,1);
-            EMG=spline(EMG(:,1),EMG(:,2:end),tStart:1000/250:tEnd).';
+            newEMG=spline(EMG(:,1).',EMG(:,2:end).',tStart:1000/250:tEnd).';
             newData=newData(:,2:end);
         else
             r=.055;
@@ -109,10 +116,10 @@ for indSet=1:length(Set)
 
             newData=Data(Start*ClipOverlap*Cliplen:End*ClipOverlap*Cliplen,:);
             tStart=newData(1,1); tEnd=newData(end,1);
-            EMG=spline(EMG(:,1),EMG(:,2:end),tStart:1000/250:tEnd).';
+            newEMG=spline(EMG(:,1).',EMG(:,2:end).',tStart:1000/250:tEnd).';
             newData=newData(:,2:end);
         end
-        csvwrite([dirname 'TrimmedData\' Set{indSet} '\' filenames(indFile).name],newData)
-        csvwrite([dirname 'TrimmedData\' Set{indSet} '\' filenames(indFile).name '_EMG'],newEMG)
+        csvwrite([dirname 'TrimmedData\' Set{indSet} '\ACC\' filenames(indFile).name],newData)
+        csvwrite([dirname 'TrimmedData\' Set{indSet} '\EMG\' filenames(indFile).name(1:end-4) '_EMG.csv'],newEMG)
     end
 end

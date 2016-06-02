@@ -139,11 +139,11 @@ lab = [lab;{Features(:).ActivityLabel}'];
 
 %% PCA
 if DoPCA
-   f(:,8) = []; %drop Sample Entropy
+   f_new=f(:,[1:7 9:13]); %drop Sample Entropy
    inds=strcmp('IA',lab);
-   f(inds,:)=[];
+   f_new(inds,:)=[];
    lab(inds)=[];
-   [coeff,score,latent,~,explained] = pca(f);
+   [coeff,score,latent,~,explained] = pca(f_new);
    explained
    figure, gscatter(score(:,1),score(:,2),lab)
 %    figure, hold on 
