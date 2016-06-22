@@ -63,7 +63,13 @@ handles.marker1 = 0;
 handles.marker2 = 0;
 locationList = get(handles.popupmenuLocation,'string');
 
-[filename,pathname] = uigetfile(['Z:\Stroke MC10\PreppedData\' locationList{get(handles.popupmenuLocation,'value')} '*.csv']);
+locVal=get(handles.popupmenuLocation,'value');
+
+if locVal==1
+    [filename,pathname] = uigetfile(['Z:\Stroke MC10\PreppedData\' locationList{locVal} '*PF*.csv']);
+else
+    [filename,pathname] = uigetfile(['Z:\Stroke MC10\PreppedData\' locationList{locVal} '*KF*.csv']);
+end
 if filename == 0
     return;
 end

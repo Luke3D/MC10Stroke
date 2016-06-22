@@ -7,11 +7,12 @@
 clear all
 
 Fs=250; % Sampling Frequency
-HPF=10; % Frequency for High-Pass filter on EMG data
-initBuff=3000;
+HPF=30; % Frequency for High-Pass filter on EMG data
+initBuff=3000; % Buffer window to take around Timestamps
 % Subjects to exclude from loop
-RemoveSub={'CS001', 'CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007', 'CS008', 'CS009', 'CS011', 'CS012'};
-% RemoveSub={};
+% RemoveSub={'CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007', 'CS008', 'CS009', 'CS010', 'CS011', 'CS012', 'CS013', 'CS014', 'CS015', ...
+%     'CS016', 'CS017', 'CS018', 'CS019', 'CS020', 'CS021', 'CS022', 'CS023', 'CS024', 'CS025', 'CS026', 'CS027', 'CS028', 'CS029', 'CS030'};
+RemoveSub={};
 dirname='Z:\Stroke MC10\';
 Locations={'Gastrocnemius' 'Hamstring'};
 % Locations={'Medial Chest'};
