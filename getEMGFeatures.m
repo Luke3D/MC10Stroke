@@ -23,8 +23,8 @@ for i=1:size(X,1)
     %Zero Crossings
     diffxk = diff(x(i,:));
     sgnxk = diffxk(1:end-1).*diffxk(2:end);
-    ind0 = find(abs(diffxk) > epsthresh & diffxk < 0);
-    ZC = length(ind0)/length(x);
+    ind0 = (abs(diffxk) > epsthresh) & (diffxk < 0);
+    ZC = sum(ind0)/length(x);
     fvec = [fvec ZC]; flab = [flab; [num2str(i) '-ZeroCross']];
     
     %Slope Sign Changes
@@ -32,8 +32,8 @@ for i=1:size(X,1)
     SC_a = xk>xkm1 & xk>xkp1;
     SC_b = xk<xkm1 & xk<xkp1;
     SC_c = (abs(xk-xkm1) >= epsthresh) | (abs(xk-xkp1) >= epsthresh);
-    SC = find( (SC_a | SC_b) & SC_c);
-    SC = length(SC)/length(x);
+    SC = (SC_a | SC_b) & SC_c;
+    SC = sum(SC)/length(x);
     fvec = [fvec SC]; flab = [flab; [num2str(i) '-SlopeSignChange']];
     
     %Waveform length
