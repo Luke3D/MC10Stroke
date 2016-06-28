@@ -69,6 +69,11 @@ for jj = 1:length(C_G)
     end
 end
 
+Precision1 = Precision1(Precision1~=0);
+Precision2 = Precision2(Precision2~=0);
+Recall1 = Recall1(Recall1~=0);
+Recall2 = Recall2(Recall2~=0);
+
 Precision_H = mean(Precision1);
 Precision_G = mean(Precision2);
 
@@ -78,7 +83,31 @@ Recall_G = mean(Recall2);
 fprintf('Hamstring Data\n')
 fprintf('Mean Precision: %f\n', Precision_H)
 fprintf('Mean Recall:    %f\n', Recall_H)
-fprintf('---------------------\n')
+fprintf('-----------------------------\n')
 fprintf('Gastrocnemius Data\n')
 fprintf('Mean Precision: %f\n', Precision_G)
 fprintf('Mean Recall:    %f\n', Recall_G)
+
+XH = Precision1';   XG = Precision2';
+X = [XH; XG];
+M1 = repmat('H',1,length(Precision1));
+M2 = repmat('G',1,length(Precision2));
+M = [M1 M2]';
+
+figure
+boxplot(X,M,'Labels',{'Hamstring', 'Gastrocnemius'})
+title('Calculated Precision')
+xlabel('Muscle Measured')
+ylabel('Precision')
+
+XH2 = Recall1';     XG2 = Recall2';
+X2 = [XH2; XG2];
+Mone = repmat('H',1,length(Recall1));
+Mtwo = repmat('G',1,length(Recall2));
+Mtot = [Mone Mtwo]';
+
+figure
+boxplot(X2,Mtot,'Labels',{'Hamstring', 'Gastrocnemius'})
+title('Calculated Recall')
+xlabel('Muscle Measured')
+ylabel('Recall')
