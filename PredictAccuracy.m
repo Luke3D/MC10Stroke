@@ -1,6 +1,6 @@
 load('PatientData.mat')
 N = {'h' 'g'};
-n = [14, 27];
+n = [15, 27];
 nTrees = 50;
 
 trainingData = [];
@@ -22,14 +22,13 @@ for ii = 1:2
 %         end
         tempData = PatientData.([N{ii}]);
         tempLabels = PatientData.([N{ii} 'Label']);
+        tempData(jj) = [];
+        tempLabels(jj) = [];
         
         parfor kk = 1:length(tempData)
             trainingData=[trainingData; tempData{kk}];
             trainingLabels=[trainingLabels; tempLabels{kk}];
         end
-        
-        tempData(jj) = [];
-        tempLabels(jj) = [];
         
         testData = PatientData.([N{ii}]){jj};
         testLabels = PatientData.([N{ii} 'Label']){jj};
@@ -60,10 +59,16 @@ for ii = 1:2
     
 end
 
-H_TreeBaggerAvg = mean(accuracy1(1,1:14));  % Only 1-14 has data, rest are 0's from Gastrocnemius sharing same array
-H_RUSBoostAvg = mean(accuracy2(1,1:14));
+H_TreeBaggerAvg = mean(accuracy1(1,1:15));  % Only 1-14 has data, rest are 0's from Gastrocnemius sharing same array
+H_RUSBoostAvg = mean(accuracy2(1,1:15));
 G_TreeBaggerAvg = mean(accuracy1(2,:));
 G_RUSBoostAvg = mean(accuracy2(2,:));
+
+Hamstring_Avg = mean([H_TreeBaggerAvg H_RUSBoostAvg]);
+Gastro_Avg = mean([G_TreeBaggerAvg G_RUSBoostAvg]);
+
+BT_Avg = mean([H_TreeBaggerAvg G_TreeBaggerAvg]);
+RS_Avg = mean([H_RUSBoostAvg G_RUSBoostAvg]);
 
 fprintf('Tree Bagger Accuracy [Hamstring]: %5.3f%%\n', 100*H_TreeBaggerAvg)
 fprintf('Tree Bagger Accuracy [Gastrocnemius]: %5.3f%%\n', 100*G_TreeBaggerAvg)
@@ -71,4 +76,10 @@ fprintf('Tree Bagger Accuracy [Gastrocnemius]: %5.3f%%\n', 100*G_TreeBaggerAvg)
 fprintf('RUS Boost Accuracy [Hamstring]: %5.3f%%\n', 100*H_RUSBoostAvg)
 fprintf('RUS Boost Accuracy [Gastrocnemius]: %5.3f%%\n', 100*G_RUSBoostAvg)
 
+fprintf('\n------------------------------------------------------------\n')
 
+fprintf('\nHamstring Accuracy: %5.3f%%\n', 100*Hamstring_Avg)
+fprintf('\nGastrocnemius Accuracy: %5.3f%%\n', 100*Gastro_Avg)
+
+fprintf('\nBaggedTrees Accuracy: %5.3f%%\n', 100*BT_Avg)
+fprintf('\nRUSBoosted Trees Accuracy: %5.3f%%\n', 100*RS_Avg)
