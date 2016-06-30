@@ -10,12 +10,11 @@ Fs=250; % Sampling Frequency
 HPF=30; % Frequency for High-Pass filter on EMG data
 initBuff=3000; % Buffer window to take around Timestamps
 % Subjects to exclude from loop
-RemoveSub={'CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007', 'CS008', 'CS009', 'CS010', 'CS011', 'CS012', 'CS013', 'CS014', 'CS015', ...
-    'CS016', 'CS017', 'CS018', 'CS019', 'CS020', 'CS021', 'CS022', 'CS023'};%, 'CS024', 'CS025', 'CS026', 'CS027', 'CS028', 'CS029', 'CS030'};
-% RemoveSub={};
+% RemoveSub={'CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007', 'CS008', 'CS009', 'CS010', 'CS011', 'CS012', 'CS013', 'CS014', 'CS015', ...
+%     'CS016', 'CS017', 'CS018', 'CS019', 'CS020', 'CS021', 'CS022', 'CS023'};%, 'CS024', 'CS025', 'CS026', 'CS027', 'CS028', 'CS029', 'CS030'};
+RemoveSub={};
 dirname='Z:\Stroke MC10\';
 Locations={'Gastrocnemius' 'Hamstring'};
-% Locations={'Medial Chest'};
 
 % Identify Directories with Raw Subject Data
 filenames=dir([dirname 'CS*']);
@@ -79,11 +78,25 @@ for indDir=1:length(filenames)
                 afe=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
                     '\' datafiles(ind).name '\sensors\emg.csv']);               
             end
+ 
+            if afe(end,1)-Times.Start(i)<0;            
+                ind=ind+1;
+                if exist([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
+                    '\' datafiles(ind).name '\sensors\afe.csv'],'file')
+                    afe=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
+                        '\' datafiles(ind).name '\sensors\afe.csv']);
+                else
+                    afe=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
+                        '\' datafiles(ind).name '\sensors\ecg.csv']);               
+                end
+            end
+            
             % Only load accel data from Gastrocs
             if strcmp(Locations{indLoc},'Gastrocnemius')
                 accel=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
                     '\' datafiles(ind).name '\sensors\accel.csv']);
             end
+            
             % Identify start and end indices in data
             [~,Start]=min(abs(afe(:,1)-Times.Start(i)+initBuff));
             [~,Stop]=min(abs(afe(:,1)-Times.End(i)-initBuff));
