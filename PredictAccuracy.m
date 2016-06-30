@@ -78,7 +78,7 @@ x1 = 1:15;
 gastro_bt = 100*accuracy(2,:);
 x2 = 1:27;
 
-a1 = mean(hamstring_bt);
+a1 = mean(hamstring_bt(1:14));
 a2 = mean(gastro_bt);
 
 A = [a1 a2];
