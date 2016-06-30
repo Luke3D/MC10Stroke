@@ -83,7 +83,7 @@ for indDir=1:length(filenames)
             accel=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
                 '\' datafiles(ind).name '\sensors\accel.csv']);
             
-            if afe(end,1)-Times.Start(i)<0;            
+            if afe(end,1)-Times.Start(i)<0           
                 ind=ind+1;
                 if exist([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
                     '\' datafiles(ind).name '\sensors\afe.csv'],'file')
