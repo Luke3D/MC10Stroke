@@ -10,8 +10,8 @@ Fs=250; % Sampling Frequency
 HPF=10; % Frequency for High-Pass filter on EMG data
 initBuff=3000;
 % Subjects to exclude from loop
-RemoveSub={'CS001', 'CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007', 'CS008', 'CS009', 'CS011', 'CS012'};
-% RemoveSub={};
+% RemoveSub={'CS001', 'CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007', 'CS008', 'CS009', 'CS011', 'CS012'};
+RemoveSub={};
 dirname='Z:\Stroke MC10\';
 Locations={'Medial Chest'};
 
@@ -79,9 +79,25 @@ for indDir=1:length(filenames)
                 afe=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
                     '\' datafiles(ind).name '\sensors\ecg.csv']);               
             end
-            % Only load accel data from Gastrocs
+            % load accel data
             accel=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
                 '\' datafiles(ind).name '\sensors\accel.csv']);
+            
+            if afe(end,1)-Times.Start(i)<0;            
+                ind=ind+1;
+                if exist([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
+                    '\' datafiles(ind).name '\sensors\afe.csv'],'file')
+                    afe=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
+                        '\' datafiles(ind).name '\sensors\afe.csv']);
+                else
+                    afe=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
+                        '\' datafiles(ind).name '\sensors\ecg.csv']);               
+                end
+                % load accel data
+                accel=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
+                    '\' datafiles(ind).name '\sensors\accel.csv']);
+            end
+            
             % Identify start and end indices in data
             [~,Start]=min(abs(afe(:,1)-Times.Start(i)+initBuff));
             [~,Stop]=min(abs(afe(:,1)-Times.End(i)-initBuff));
@@ -107,13 +123,10 @@ for indDir=1:length(filenames)
             ACC=accel(Start:Stop,:);
             ACC(:,1)=(ACC(:,1))/1000;
 
-            t=min(EMG(:,1)):0.004:max(EMG(:,1));
+            t=min(EMG(:,1)):0.02:max(EMG(:,1));
             ACC=spline(ACC(:,1).', ACC(:,2:end).', t.');
             t=t-t(1);
             ACC=[t.' ACC.'];
-
-            % Store data together
-            Data=[ACC EMG(:,2)];
             
             % Save prepped data
             X=cell2mat(Times.Label(i));
@@ -125,7 +138,7 @@ for indDir=1:length(filenames)
                 '_' X '_accData.csv'];
 
 
-            dlmwrite(saveName,Data,'delimiter',',','precision',13)
+            dlmwrite(saveName,EMG,'delimiter',',','precision',13)
             dlmwrite(accName,ACC,'delimiter',',','precision',13)
         end
     end
