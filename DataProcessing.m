@@ -69,10 +69,10 @@ for jj = 1:length(C_G)
     end
 end
 
-Precision1 = Precision1(Precision1~=0);
-Precision2 = Precision2(Precision2~=0);
-Recall1 = Recall1(Recall1~=0);
-Recall2 = Recall2(Recall2~=0);
+Precision1 = 100*Precision1(Precision1~=0);
+Precision2 = 100*Precision2(Precision2~=0);
+Recall1 = 100*Recall1(Recall1~=0);
+Recall2 = 100*Recall2(Recall2~=0);
 
 Precision_H = mean(Precision1);
 Precision_G = mean(Precision2);
@@ -97,8 +97,9 @@ M = [M1 M2]';
 figure
 boxplot(X,M,'Labels',{'Hamstring', 'Gastrocnemius'})
 title('Calculated Precision')
-xlabel('Muscle Measured')
-ylabel('Precision')
+xlabel('Muscle')
+ylabel('Precision [%]')
+ylim([0 105])
 
 XH2 = Recall1';     XG2 = Recall2';
 X2 = [XH2; XG2];
@@ -109,5 +110,6 @@ Mtot = [Mone Mtwo]';
 figure
 boxplot(X2,Mtot,'Labels',{'Hamstring', 'Gastrocnemius'})
 title('Calculated Recall')
-xlabel('Muscle Measured')
-ylabel('Recall')
+xlabel('Muscle')
+ylabel('Recall [%]')
+ylim([0 105])
