@@ -12,7 +12,7 @@ Act_Labels=readtable('Z:\Stroke MC10\Activity Recognition\Labels_stroke.csv', 'R
 % hamFilenames=rdir('Z:\Stroke MC10\CS*\**\Hamstring\**\accel.csv');
 % hamFilenames={hamFilenames.name}.';
 
-for indLab=639:1400%height(Act_Labels)
+for indLab=1:height(Act_Labels)
     
     startStamp=datetime(1970, 1, 1, 0, 0, Act_Labels.Var3(indLab)/1000);
     
@@ -99,6 +99,18 @@ for indLab=639:1400%height(Act_Labels)
         gasEMG=csvread([gasFilenames{gasI(ind)}(1:end-9) 'emg.csv'],1,0);
     end
     
+    if gasEMG(end,1)-Act_Labels.Var3(indLab)<0
+        if ind<length(gasFilenames)
+            ind=ind+1;
+        end
+        gasData=csvread(gasFilenames{gasI(ind)},1,0);
+        if exist([gasFilenames{gasI(ind)}(1:end-9) 'afe.csv'],'file')
+            gasEMG=csvread([gasFilenames{gasI(ind)}(1:end-9) 'afe.csv'],1,0);
+        else
+            gasEMG=csvread([gasFilenames{gasI(ind)}(1:end-9) 'emg.csv'],1,0);
+        end
+    end
+    
     name=gasFilenames{ind};
     if str2double(name(30))==1
         Day='Train';
@@ -138,6 +150,18 @@ for indLab=639:1400%height(Act_Labels)
         hamEMG=csvread([hamFilenames{hamI(ind)}(1:end-9) 'afe.csv'],1,0);
     else
         hamEMG=csvread([hamFilenames{hamI(ind)}(1:end-9) 'emg.csv'],1,0);
+    end
+    
+    if hamEMG(end,1)-Act_Labels.Var3(indLab)<0
+        if ind<length(hamFilenames)
+            ind=ind+1;
+        end
+        hamData=csvread(hamFilenames{hamI(ind)},1,0);
+        if exist([hamFilenames{hamI(ind)}(1:end-9) 'afe.csv'],'file')
+            hamEMG=csvread([hamFilenames{hamI(ind)}(1:end-9) 'afe.csv'],1,0);
+        else
+            hamEMG=csvread([hamFilenames{hamI(ind)}(1:end-9) 'emg.csv'],1,0);
+        end
     end
     
     [~,Start]=min(abs(hamData(:,1)-Act_Labels.Var3(indLab)));
