@@ -54,7 +54,7 @@ for ii = 1:2
 end
 
 %--------------------------------------------------------------------------
-% Prints results of data analysis
+% Prints initial results of data analysis
 %--------------------------------------------------------------------------
 
 H_BagTreeAvg = mean(accuracy(1,1:15));  % Only elements 1-15 have data
@@ -69,31 +69,5 @@ fprintf('------------------------------------------------------------\n')
 
 fprintf('Bagged Tree Model Accuracy: %5.3f%%\n', 100*BT_Avg)
 
-%--------------------------------------------------------------------------
-% Plots Collected Data in Graphs
-%--------------------------------------------------------------------------
-hamstring_bt = 100*accuracy(1,1:15);
-x1 = 1:15;
 
-gastro_bt = 100*accuracy(2,:);
-x2 = 1:27;
 
-a1 = mean(hamstring_bt(1:14));
-a2 = mean(gastro_bt);
-
-A = [a1 a2];
-
-M = [hamstring_bt gastro_bt]';
-m1 = repmat('H_BT',size(hamstring_bt,2),1);
-m2 = repmat('G_BT',size(gastro_bt,2),1);
-
-m = [m1; m2];
-
-figure(1)
-boxplot(M,m,'Labels',{'Hamstring','Gastrocnemius'})
-% set(gca,'FontSize',10,'XTickLabelRotation',45)
-title('Accuracy Comparison of Muscles [Bagged Trees]')
-xlabel('Muscle Activity')
-ylabel('Accuracy [%]')
-text(1:2,A',num2str(A','%0.2f'),... 
-'HorizontalAlignment','center', 'VerticalAlignment','middle')
