@@ -2,6 +2,8 @@
 % Resulting files contain trimmed label data placed stitched together
 clear all
 
+% Carried over from previous version: this function is now performed by 
+% TrimLabeledData.m
 windowLength=0; % Amount to remove from both sides of data
 dirname='Z:\Stroke MC10\Activity Recognition\TrimmedData\';
 Activities={'Lying' 'Sitting' 'Standing' 'Stairs Up' 'Stairs Down' 'Walking'};

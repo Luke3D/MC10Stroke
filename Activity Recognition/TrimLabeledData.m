@@ -54,9 +54,9 @@ for indSet=1:length(Set)
             X(rmvinds)=[];
 
             if isempty(X)
-                newData=Data;
+                newData=Data(:,2:end);
                 csvwrite([dirname 'TrimmedData\' Set{indSet} '\ACC\' filenames(indFile).name],newData)
-                csvwrite([dirname 'TrimmedData\' Set{indSet} '\EMG\' filenames(indFile).name(1:end-4) '_EMG'],EMG)
+                csvwrite([dirname 'TrimmedData\' Set{indSet} '\EMG\' filenames(indFile).name(1:end-4) '_EMG'],EMG(:,2:end))
                 continue
             end
             
@@ -64,9 +64,9 @@ for indSet=1:length(Set)
             StartInd=find(diff(bursts)==-1,1)+1;
             Start=X(StartInd)+1;
             if isempty(Start)
-                newData=Data;
+                newData=Data(:,2:end);
                 csvwrite([dirname 'TrimmedData\' Set{indSet} '\ACC\' filenames(indFile).name],newData)
-                csvwrite([dirname 'TrimmedData\' Set{indSet} '\EMG\' filenames(indFile).name(1:end-4) '_EMG'],EMG)
+                csvwrite([dirname 'TrimmedData\' Set{indSet} '\EMG\' filenames(indFile).name(1:end-4) '_EMG'],EMG(:,2:end))
                 continue
             end
 
@@ -95,9 +95,9 @@ for indSet=1:length(Set)
             rmvinds=find(val<.05);
             X(rmvinds)=[];
             if isempty(X)
-                newData=Data;
+                newData=Data(:,2:end);
                 csvwrite([dirname 'TrimmedData\' Set{indSet} '\ACC\' filenames(indFile).name],newData)
-                csvwrite([dirname 'TrimmedData\' Set{indSet} '\EMG\' filenames(indFile).name(1:end-4) '_EMG'],EMG)
+                csvwrite([dirname 'TrimmedData\' Set{indSet} '\EMG\' filenames(indFile).name(1:end-4) '_EMG'],EMG(:,2:end))
                 continue
             end
             bursts=diff(X)<7;
