@@ -1,6 +1,6 @@
 % EMG Plotting
 load('EMGData.mat')
-filenames = []; processedFiles = [];
+filenames = []; processedFiles = []; len = [];
 emg = []; lab = [];
 location = {'Gastrocnemius' 'Hamstring'};
 dirname = 'Z:\Stroke MC10\LabeledData\CS0';
@@ -22,7 +22,7 @@ for x = 1:length(location)
     end
     
     for i=1:size(sub,1)
-        filenames=[filenames; rdir([dirname sub(i,:) '\**\' location{x} '*MVC' '**.csv'])];
+        filenames=[filenames; rdir([dirname sub(i,:) '\**\' location{x} '*MVC' '*.csv'])];
         
         len(i) = length(filenames);
     end
@@ -114,7 +114,7 @@ for x = 1:length(location)
         gSNR = 20*log10(gHA_RMS ./ gIA_RMS);
         gSNR = gSNR(~isnan(gSNR));
         
-    elseif strcmp(location{x}, 'Hamstring')
+    else
         for i=1:size(sub,1)
             N1 = size(hHA(i).emg,1);
             N2 = size(hIA(i).emg,1);
@@ -137,12 +137,12 @@ end
 figure
 subplot(2,1,1)
 histogram(gSNR, length(gSNR))
-xlabel('SNR')
+xlabel('SNR [dB]')
 ylabel('Number of Subjects')
 title('Gastrocnemius SNR Distribution')
 
 subplot(2,1,2)
 histogram(hSNR, length(hSNR))
-xlabel('SNR')
+xlabel('SNR [dB]')
 ylabel('Number of Subjects')
 title('Hamstring SNR Distribution')
