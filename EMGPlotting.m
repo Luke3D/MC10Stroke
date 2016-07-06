@@ -1,8 +1,9 @@
 % EMG Plotting
 load('EMGData.mat')
-filenames = [];
+filenames = []; processedFiles = [];
+emg = []; lab = [];
 location = {'Gastrocnemius' 'Hamstring'};
-emg = [];   lab = [];
+dirname = 'Z:\Stroke MC10\LabeledData\CS0';
 
 subject{1}=([1:20 23:29])'; % Gastrocnemius index
 subject{2}=([1:15])'; % Hamstring index
@@ -11,183 +12,137 @@ subject{2}=([1:15])'; % Hamstring index
 % Data Extraction
 %--------------------------------------------------------------------------
 for x = 1:length(location)
-    filenames = [];
+    filenames = []; processedFiles = []; len = [];
     sub = num2str(subject{x});
-
+    
     for i=1:size(sub,1)
         if strcmp(sub(i,1),' ')
             sub(i,1)='0';
         end
     end
-
+    
     for i=1:size(sub,1)
-        filenames=[filenames; rdir(['Z:\Stroke MC10\Clips\' sub(i,:) '\**\' location{x} '*MVC' '*F_Clips.mat'])];
-
+        filenames=[filenames; rdir([dirname sub(i,:) '\**\' location{x} '*MVC' '**.csv'])];
+        
         len(i) = length(filenames);
     end
-
-    for i=1:size(sub,1)
-        if i == 1
-            for j = 1:len(1);
-                temp = load(filenames(j).name);
-                temp = temp.AllClips;
-                emg = [emg; cell2mat({temp(:).Emg})'];
-                lab = [lab; {temp(:).ActivityLabel}'];
-            end
-
-            if strcmp(location{x}, 'Gastrocnemius')
-                emgData(i).gEMG = emg;
-                emgData(i).gLabel = lab;
-            else
-                emgData(i).hEMG = emg;
-                emgData(i).hLabel = lab;
-            end
-
-            emg = [];
-            lab = [];
-        else
-            for j = len(i-1) + 1 : len(i)
-                temp = load(filenames(j).name);
-                temp = temp.AllClips;
-                emg = [emg; cell2mat({temp(:).Emg})'];
-                lab = [lab; {temp(:).ActivityLabel}'];
-            end
-
-            if strcmp(location{x}, 'Gastrocnemius')
-                emgData(i).gEMG = emg;
-                emgData(i).gLabel = lab;
-            else
-                emgData(i).hEMG = emg;
-                emgData(i).hLabel = lab;
-            end
-
-            emg = [];
-            lab = [];
-        end
-
-        emg = [];
-        lab = [];
-        temp = [];
+    
+    for i=1:length(filenames)
+        [num, text, ~] = xlsread(filenames(i).name);
+        index = strcmp(text(:,1), 'Not labeled');
+        num = num(~index,5);
+        text = text(~index);
+        
+        processedFiles(i).emg = num;
+        processedFiles(i).lab = text;
     end
-end
-
-%--------------------------------------------------------------------------
-% RMS, Power, and SNR Calculations
-%--------------------------------------------------------------------------
-temp = [];
-Power_IA_g = []; Power_HA_g = [];
-Power_IA_h = []; Power_HA_h = [];
-rms_IA_g = []; rms_HA_g = [];
-rms_IA_h = []; rms_HA_h = [];
-n_IA = 1; n_HA = 1;
-
-for x = 1:length(location)
-    sub = subject{x};
     
     for i = 1:size(sub,1)
-        if strcmp(location{x}, 'Gastrocnemius')
-            tempDat = emgData(i).gEMG;
-            tempLab = emgData(i).gLabel;
-            
-            N = size(tempDat,2);
-            
-            for j = 1:size(tempDat,1)
-                label = char(tempLab(j));
-                if strcmp(label, 'IA')
-                    tempVal = sum(tempDat(j,:).^2) / N;
-                    Power_IA_g(n_IA) = tempVal;
-                    rms_IA_g(n_IA) = sqrt(tempVal);
-                    n_IA = n_IA + 1;
-                else
-                    tempVal = sum(tempDat(j,:).^2) / N;
-                    Power_HA_g(n_HA) = tempVal;
-                    rms_HA_g(n_HA) = sqrt(tempVal);
-                    n_HA = n_HA + 1;
-                end
+        if i == 1
+            for j = 1:len(1)
+                emg = [emg; processedFiles(j).emg];
+                lab = [lab; processedFiles(j).lab];
             end
-        else
-            tempDat = emgData(i).hEMG;
-            tempLab = emgData(i).hLabel;
             
-            N = size(tempDat,2);
-            
-            for j = 1:size(tempDat,1)
-                label = char(tempLab(j));
-                if strcmp(label, 'IA')
-                    tempVal = sum(tempDat(j,:).^2) / N;
-                    Power_IA_h(n_IA) = tempVal;
-                    rms_IA_h(n_IA) = sqrt(tempVal);
-                    n_IA = n_IA + 1;
-                else
-                    tempVal = sum(tempDat(j,:).^2) / N;
-                    Power_HA_h(n_HA) = tempVal;
-                    rms_HA_h(n_HA) = sqrt(tempVal);
-                    n_HA = n_HA + 1;
-                end
+            if strcmp(location{x}, 'Gastrocnemius')
+                gEMG(i).emg = emg;
+                gEMG(i).lab = lab;
+            else
+                hEMG(i).emg = emg;
+                hEMG(i).lab = lab;
             end
-        end
-        
-        if isempty(Power_IA_g)
-            Power_IA_g = 0;
-            rms_IA_g = 0;
-        end
-        if isempty(Power_HA_g)
-            Power_HA_g = 0;
-            rms_HA_g = 0;
-        end
-        
-        if isempty(Power_IA_h)
-            Power_IA_h = 0;
-            rms_IA_h = 0;
-        end
-        if isempty(Power_HA_h)
-            Power_HA_h = 0;
-            rms_HA_h = 0;
-        end
-        
-        if strcmp(location{x}, 'Gastrocnemius')
-            POWER_IA_G(i) = mean(Power_IA_g);
-            POWER_HA_G(i) = mean(Power_HA_g);
-            RMS_IA_G(i) = mean(rms_IA_g);
-            RMS_HA_G(i) = mean(rms_HA_g);
-
-            Power_IA_g = []; Power_HA_g = [];
-            rms_IA_g = []; rms_HA_g = [];
-            n_IA = 1; n_HA = 1;
+            
+            emg = [];
+            lab = [];
         else
-            POWER_IA_H(i) = mean(Power_IA_h);
-            POWER_HA_H(i) = mean(Power_HA_h);
-            RMS_IA_H(i) = mean(rms_IA_h);
-            RMS_HA_H(i) = mean(rms_HA_h);
-
-            Power_IA_h = []; Power_HA_h = [];
-            rms_IA_h = []; rms_HA_h = [];
-            n_IA = 1; n_HA = 1;
+            for j = len(i-1)+1:len(i);
+                emg = [emg; processedFiles(j).emg];
+                lab = [lab; processedFiles(j).lab];
+            end
+            
+            if strcmp(location{x}, 'Gastrocnemius')
+                gEMG(i).emg = emg;
+                gEMG(i).lab = lab;
+            else
+                hEMG(i).emg = emg;
+                hEMG(i).lab = lab;
+            end
+            
+            emg = [];
+            lab = [];
         end
     end
+    
+    index = [];
+    for i=1:size(sub,1)
+        if strcmp(location{x}, 'Gastrocnemius')
+            tempDat = gEMG(i).emg;
+            tempLab = gEMG(i).lab;
+            
+            index = strcmp(tempLab, 'Inactive');
+            gIA(i).emg = tempDat(index);
+            gIA(i).lab = tempLab(index);
+            gHA(i).emg = tempDat(~index);
+            gHA(i).lab = tempLab(~index);
+        else
+            tempDat = hEMG(i).emg;
+            tempLab = hEMG(i).lab;
+            
+            index = strcmp(tempLab, 'Inactive');
+            hIA(i).emg = tempDat(index);
+            hIA(i).lab = tempLab(index);
+            hHA(i).emg = tempDat(~index);
+            hHA(i).lab = tempLab(~index);
+        end
+    end
+    
+    if strcmp(location{x}, 'Gastrocnemius')
+        for i = 1:size(sub,1)
+            N1 = size(gHA(i).emg,1);
+            N2 = size(gIA(i).emg,1);
+            
+            valTemp1 = sum((gHA(i).emg .^ 2)) / N1;
+            gHA_Power(i) = valTemp1;
+            gHA_RMS(i) = sqrt(valTemp1);
+            
+            valTemp2 = sum((gIA(i).emg .^ 2)) / N2;
+            gIA_Power(i) = valTemp2;
+            gIA_RMS(i) = sqrt(valTemp2);
+        end
+        N1 = 0; N2 = 0; valTemp1 = 0; valTemp2 = 0;
+        
+        gSNR = 20*log10(gHA_RMS ./ gIA_RMS);
+        gSNR = gSNR(~isnan(gSNR));
+        
+    elseif strcmp(location{x}, 'Hamstring')
+        for i=1:size(sub,1)
+            N1 = size(hHA(i).emg,1);
+            N2 = size(hIA(i).emg,1);
+            
+            valTemp1 = sum((hHA(i).emg .^ 2)) / N1;
+            hHA_Power(i) = valTemp1;
+            hHA_RMS(i) = sqrt(valTemp1);
+            
+            valTemp2 = sum((hIA(i).emg .^ 2)) / N2;
+            hIA_Power(i) = valTemp2;
+            hIA_RMS(i) = sqrt(valTemp2);
+        end
+        N1 = 0; N2 = 0; valTemp1 = 0; valTemp2 = 0;
+        
+        hSNR = 20*log10(hHA_RMS ./ hIA_RMS);
+        hSNR = hSNR(~isnan(hSNR));
+    end
 end
-
-index1 = RMS_IA_G==0;             index2 = RMS_HA_G==0;
-index = index1 + index2;
-RMS_IA_G = RMS_IA_G(~index);    RMS_HA_G = RMS_HA_G(~index);
-
-index1 = RMS_IA_H==0;             index2 = RMS_HA_H==0;
-index = index1 + index2;
-RMS_IA_H = RMS_IA_H(~index);    RMS_HA_H = RMS_HA_H(~index);
-
-
-SNR_G = 20*log10(RMS_HA_G ./ RMS_IA_G);
-SNR_H = 20*log10(RMS_HA_H ./ RMS_IA_H);
 
 figure
 subplot(2,1,1)
-histogram(SNR_G, length(SNR_G))
+histogram(gSNR, length(gSNR))
 xlabel('SNR')
 ylabel('Number of Subjects')
-title('Histogram of Gastrocnemius SNR')
+title('Gastrocnemius SNR Distribution')
 
 subplot(2,1,2)
-histogram(SNR_H, length(SNR_H))
+histogram(hSNR, length(hSNR))
 xlabel('SNR')
 ylabel('Number of Subjects')
-title('Histogram of Hamstring SNR')
+title('Hamstring SNR Distribution')
