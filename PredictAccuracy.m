@@ -2,6 +2,7 @@ load('PatientData.mat')
 N = {'h' 'g'};
 n = [15, 27];
 nTrees = 50;
+y = 1;
 
 trainingData = [];
 trainingLabels= [];
@@ -13,7 +14,7 @@ tempData = [];
 tempLabels = [];
 
 for ii = 1:2
-    for jj = 1:n(ii)
+     for jj = 1:n(ii)
 %         for kk = 1:30
 %             if kk ~= jj
 %                 trainingData = [trainingData; PatientData.([N{ii}]){kk}];
@@ -39,6 +40,20 @@ for ii = 1:2
         ConfMat{ii,jj}=confusionmat(testLabels, LabelsRF);
         accuracy(ii,jj) = mean(strcmp(testLabels, LabelsRF));
         
+%         testLabels = char(testLabels);
+%         testLabels = testLabels(:,1);
+%         testLabels = oneHot(testLabels);
+%         
+%         LabelsRF = char(LabelsRF);
+%         LabelsRF = LabelsRF(:,1);
+%         LabelsRF = oneHot(LabelsRF);
+%         
+%         subplot(4,4,y)
+%         plotconfusion(testLabels, LabelsRF);
+
+        correctones = sum(ConfMat{ii,jj},2);
+        correctones = repmat(correctones,[1 2]);
+        RealConfMat{ii,jj} = ConfMat{ii,jj}./correctones;
 
         trainingData = [];
         trainingLabels = [];
@@ -48,10 +63,46 @@ for ii = 1:2
         
         tempData = [];
         tempLabels = [];
-        
-    end
-    
+     end
+
+     tempMat = zeros(2,2);
+     
+     for jj = 1:n(ii)
+         if numel(RealConfMat{ii,jj}) < 4
+             RealConfMat{ii,jj} = [RealConfMat{ii,jj}; 0, 0];
+         end
+         
+         for kk = 1:numel(RealConfMat{ii,jj})
+             if isnan(RealConfMat{ii,jj}(kk))
+                 RealConfMat{ii,jj}(kk) = 0;
+             end
+         end
+     end
+     
+     for jj = 1:n(ii)
+         tempMat = tempMat + RealConfMat{ii,jj};
+     end
+     
+     TrueConf{ii} = tempMat / n(ii);
+     tempMat = zeros(2,2);
+     
 end
+
+
+figure
+imagesc(TrueConf{1}); colorbar
+caxis([0 1])
+title('Hamstring Confusion Matrix')
+set(gca,'XTick', [1 2]), set(gca, 'XTickLabels', {'Spastic', 'Non-Spastic'})
+set(gca,'YTick', [1 2]), set(gca, 'YTickLabels', {'Spastic', 'Non-Spastic'})
+
+figure
+imagesc(TrueConf{2}); colorbar
+caxis([0 1])
+title('Gastrocnemius Confusion Matrix')
+set(gca,'XTick', [1 2]), set(gca, 'XTickLabels', {'Spastic', 'Non-Spastic'})
+set(gca,'YTick', [1 2]), set(gca, 'YTickLabels', {'Spastic', 'Non-Spastic'})
+
 
 %--------------------------------------------------------------------------
 % Prints initial results of data analysis
