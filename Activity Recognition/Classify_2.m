@@ -1,9 +1,11 @@
 %% Train classifier based on MC10 data from Phone Labels
 % Run after GenerateClips.m
-Subj_CrossVal=0;
+Subj_CrossVal=1;
 
 nTrees=150;
-Activities={'Lying' 'Sitting' 'Standing' 'Stairs Up' 'Stairs Down' 'Walking'};
+Activities={'Lying' 'Sitting' 'Stairs Down' 'Stairs Up' 'Standing' 'Walking'};
+
+dirname = 'Z:\Stroke MC10\Activity Recognition\TrimmedData';
 
 Test=load([dirname '\ActivityData\TestFeat.mat']);
 Train=load([dirname '\ActivityData\TrainFeat.mat']);
@@ -36,10 +38,10 @@ if ~Subj_CrossVal
     
     RFModel=TreeBagger(nTrees, TrainFeat, TrainLabel);
     [LabelsRF,P_RF] = predict(RFModel,TestFeat);
-    ConfMat=confusionmat(TestLabel, LabelsRF);
+    RealConfMat=confusionmat(TestLabel, LabelsRF);
 
 else
-    for indFold=10:length(Test)
+    for indFold=1:length(Test)
         if isempty(Test(indFold).Features)
             continue
         end
@@ -64,11 +66,25 @@ else
         
         RFModel=TreeBagger(nTrees, TrainFeat, TrainLabel);
         [LabelsRF,P_RF] = predict(RFModel,TestFeat);
-        ConfMat(:,:,indFold)=confusionmat(TestLabel, LabelsRF);
+        
+        ConfMat{indFold}(:,:) = confusionmat(TestLabel, LabelsRF);
+
+        x = unique(LabelsRF);
+        
+        RealConfMat(:,:,indFold) = check(x, ConfMat{indFold}(:,:));      
+                    
+        
+%         ConfMat(:,:,indFold)=confusionmat(TestLabel, LabelsRF);
+%         ConfMat{indFold}(:,:)=confusionmat(TestLabel, LabelsRF);
+        
+%         n(1,indFold) = length(unique(TrainLabel));
+%         n(2,indFold) = length(unique(TestLabel));
+%         n(3,indFold) = length(unique(LabelsRF));
+%         n(4,indFold) = length(ConfMat{indFold}(:,:));
     end
 end
 
-ConfMatAll=sum(ConfMat,3);
+ConfMatAll=sum(RealConfMat,3);
 correctones = sum(ConfMatAll,2);
 correctones = repmat(correctones,[1 6]);
 figure; imagesc(ConfMatAll./correctones, [0 1]); colorbar
