@@ -1,6 +1,6 @@
 %% Train classifier based on MC10 data from Phone Labels
 % Run after GenerateClips.m
-Subj_CrossVal=1;
+Subj_CrossVal=0;
 
 nTrees=150;
 Activities={'Lying' 'Sitting' 'Stairs Down' 'Stairs Up' 'Standing' 'Walking'};
@@ -39,7 +39,13 @@ if ~Subj_CrossVal
     RFModel=TreeBagger(nTrees, TrainFeat, TrainLabel);
     [LabelsRF,P_RF] = predict(RFModel,TestFeat);
     RealConfMat=confusionmat(TestLabel, LabelsRF);
+    
+    d = diag(RealConfMat);
+    cor = sum(d);
+    tot = sum(sum(RealConfMat));
 
+    acy = 100*cor / tot;
+    
 else
     for indFold=1:length(Test)
         if isempty(Test(indFold).Features)
@@ -71,7 +77,13 @@ else
 
         x = unique(LabelsRF);
         
-        RealConfMat(:,:,indFold) = check(x, ConfMat{indFold}(:,:));      
+        RealConfMat(:,:,indFold) = check(x, ConfMat{indFold}(:,:));
+        
+        d = diag(ConfMat{indFold}(:,:));
+        cor = sum(d);
+        tot = sum(sum(ConfMat{indFold}(:,:)));
+        
+        acy(indFold) = 100*cor / tot;
                     
         
 %         ConfMat(:,:,indFold)=confusionmat(TestLabel, LabelsRF);
@@ -92,3 +104,25 @@ set(gca,'XTickLabel',Activities)
 set(gca,'YTickLabel',Activities)
 set(gca,'XTick',[1 2 3 4 5 6])
 set(gca,'YTick',[1 2 3 4 5 6])
+
+D = diag(ConfMatAll);
+correct = sum(D);
+total = sum(sum(ConfMatAll));
+
+mAcy = mean(acy);
+Accuracy = 100*correct / total;
+
+fprintf('Model Accuracy: %6.4f%%\n', Accuracy)
+fprintf('Mean Model Accuracy: %6.4f%%\n', mAcy)
+
+
+tempConf = ConfMatAll;
+
+tempPre = diag(tempConf) ./ sum(tempConf,1)';
+tempRec = diag(tempConf) ./ sum(tempConf,2);
+
+tempPre(isnan(tempPre)) = 0;
+tempRec(isnan(tempRec)) = 0;
+
+Precision = tempPre;
+Recall = tempRec;
