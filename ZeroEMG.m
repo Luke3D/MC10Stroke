@@ -6,7 +6,6 @@
 % scores (1, 1+, 2, 3) Default data set is for 0
 %--------------------------------------------------------------------------
 load('AshworthScores.mat')
-load('PatientData.mat')
 %--------------------------------------------------------------------------
 %--------------------------------------------------------------------------
 % Patients with an Ashworth Score of 0
@@ -50,8 +49,14 @@ gEMG = {};  hEMG = {};
 % h = ['10'];                  % Ashworth Score of 2
 % g = ['16'];
 
-h = [' 5'];                   % Ashworth Score of 3
-g = [1 23 24]';
+% h = [' 5'];                   % Ashworth Score of 3
+% g = [1 23 24]';
+
+% g=([1:20 23:29])'; % Gastrocnemius index
+% h=([1:15])'; % Hamstring index
+
+g = [1 29]';
+h = [1:15]';
 
 subject1 = num2str(g);
 subject2 = num2str(h);
@@ -70,13 +75,13 @@ end
 
 filenames1 = [];
 for jj=1:size(subject1,1)
-    filenames1 = [filenames1; rdir([dirname subject1(jj,:) '\**\' 'Gastrocnemius_MAS' '*' 'PF_emgData.csv'])];
+    filenames1 = [filenames1; rdir([dirname subject1(jj,:) '\**\' 'Gastrocnemius*MAS' '*' 'PF_emgData.csv'])];
     len1(jj) = length(filenames1);
 end
 
 filenames2 = [];
 for i = 1:size(subject2,1);
-    filenames2 = rdir([dirname subject2(i,:) '\**\' 'Hamstring_MAS' '*' 'KF_emgData.csv']);
+    filenames2 = [filenames2; rdir([dirname subject2(i,:) '\**\' 'Hamstring*MAS' '*' 'KF_emgData.csv'])];
     len2(i) = length(filenames2);
 end
 
@@ -101,12 +106,12 @@ emgTime = [];   emgData = [];   emgRaw = [];
 for x = 1:size(subject1,1)
     if x == 1
         for i = 1:len1(1);
-            emgTime = [emgTime; EMG_RAW{i}(:,1)];
+            % = [emgTime; EMG_RAW{i}(:,1)];
             emgData = [emgData; EMG{i}];
             emgRaw = [emgRaw; EMG_RAW{i}(:,2)];
         end
         
-        gEMG{x}(:,1) = emgTime;
+        %gEMG{x}(:,1) = emgTime;
         gEMG{x}(:,2) = emgData;
         gEMG{x}(:,3) = emgRaw;
         
@@ -114,12 +119,12 @@ for x = 1:size(subject1,1)
 
     else
         for i = len1(x-1) + 1 : len1(x)
-            emgTime = [emgTime; EMG_RAW{i}(:,1)];
+            %emgTime = [emgTime; EMG_RAW{i}(:,1)];
             emgData = [emgData; EMG{i}];
             emgRaw = [emgRaw; EMG_RAW{i}(:,2)];
         end
 
-        gEMG{x}(:,1) = emgTime;
+        %gEMG{x}(:,1) = emgTime;
         gEMG{x}(:,2) = emgData;
         gEMG{x}(:,3) = emgRaw;
         
@@ -146,12 +151,12 @@ end
 for x = 1:size(subject2,1)
     if x == 1
         for i = 1:len2(1);
-            emgTime = [emgTime; EMG_RAW{i}(:,1)];
+            %emgTime = [emgTime; EMG_RAW{i}(:,1)];
             emgData = [emgData; EMG{i}];
             emgRaw = [emgRaw; EMG_RAW{i}(:,2)];
         end
         
-        hEMG{x}(:,1) = emgTime;
+        %hEMG{x}(:,1) = emgTime;
         hEMG{x}(:,2) = emgData;
         hEMG{x}(:,3) = emgRaw;
         
@@ -159,12 +164,12 @@ for x = 1:size(subject2,1)
 
     else
         for i = len2(x-1) + 1 : len2(x)
-            emgTime = [emgTime; EMG_RAW{i}(:,1)];
+            %emgTime = [emgTime; EMG_RAW{i}(:,1)];
             emgData = [emgData; EMG{i}];
             emgRaw = [emgRaw; EMG_RAW{i}(:,2)];
         end
 
-        hEMG{x}(:,1) = emgTime;
+        %hEMG{x}(:,1) = emgTime;
         hEMG{x}(:,2) = emgData;
         hEMG{x}(:,3) = emgRaw;
         
@@ -186,10 +191,13 @@ for i = 1:size(subject1,1)
         xlabel('Time [ms]')
         ylabel('Voltage [V]')
         title(['CS0' subject1(i,:) ': Filtered EMG Signal'])
+        v = axis;
 
+        
         subplot(2,1,2)
         plot(gEMG{i}(:,3))
         xlabel('Time [ms]')
         ylabel('Voltage [V]')
+        axis(v)
         title(['CS0' subject1(i,:) ': Raw EMG Signal'])
 end
