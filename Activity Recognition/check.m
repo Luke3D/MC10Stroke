@@ -10,7 +10,7 @@ Activities={'Lying' 'Sitting' 'Stairs Down' 'Stairs Up' 'Standing' 'Walking'};
 RealConfMat = [];
 
 N = length(ConfMat);
-c = []; c1 = []; c2 = [];
+c1 = []; c2 = [];
 present = zeros(1,6);
 
 for i = 1:length(x)
@@ -22,6 +22,7 @@ c = ConfMat;
 
 if N == 6
     RealConfMat = ConfMat;
+    return
 else
     for i = 1:length(missing)
         n = length(c);
@@ -67,13 +68,6 @@ else
                 
                 
             case 'Stairs Up'
-%                 c1(1:n-1,:) = c(1:n-1,:);
-%                 c1(n,:) = zeros(1,n);
-%                 c1(n+1,:) = c(end,:);
-%                 
-%                 c2(:,1:n-1) = c1(:,1:n-1);
-%                 c2(:,n) = zeros(n+1,1);
-%                 c2(:,5:n+1) = c1(:,4:end);
                 c1(1:3,:) = c(1:3,:);
                 c1(4,:) = zeros(1,n);
                 c1(5:n+1,:) = c(4:end,:);
@@ -86,13 +80,6 @@ else
                 
                 
             case 'Standing'
-%                 c1(1:n-1,:) = c(1:end-1,:);
-%                 c1(n,:) = zeros(1,n);
-%                 c1(n+1,:) = c(end,:);
-%                 
-%                 c2(:,1:n-1) = c1(:,1:end-1);
-%                 c2(:,n) = zeros(n+1,1);
-%                 c2(:,n+1) = c1(:,end);
                 c1(1:4,:) = c(1:4,:);
                 c1(5,:) = zeros(1,n);
                 c1(6,:) = c(5,:);
@@ -127,6 +114,7 @@ else
     
     RealConfMat = C;
     c1 = []; c2 = []; C = [];
+
    
 end
     
