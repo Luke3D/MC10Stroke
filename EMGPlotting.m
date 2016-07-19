@@ -1,5 +1,4 @@
 % EMG Plotting
-load('EMGData.mat')
 filenames = []; processedFiles = []; len = [];
 emg = []; lab = [];
 location = {'Gastrocnemius' 'Hamstring'};
