@@ -1,8 +1,17 @@
 close all
 
-%subject=([1:20 23:29]).';   % For Hamstring, 15-18 have no hamstring data (6/27/16)
-subject=([1:14 19]).'; % Hamstring index
-subject=num2str(subject);
+Sub{1}=([1:14 19]).'; % Hamstring index
+Sub{2}=([1:20 23:29]).';   % For Hamstring, 15-18 have no hamstring data (6/27/16)
+
+
+location={'Hamstring' 'Gastrocnemius'};
+filenames=[];
+
+f=[]; lab=[];
+
+for n = 1:length(location)
+    
+subject=num2str(Sub{n});
 if size(subject,2)==1
     subject=[repmat(' ',[length(subject) 1]) subject];
 end
@@ -12,15 +21,8 @@ for i=1:size(subject,1)
     end
 end
 
-location=['Hamstring']; % Use '**' for both
-filenames=[];
-
-f=[]; lab=[];
-
-%for n = 1:2
-    
 for i=1:size(subject,1)
-    filenames=[filenames; rdir(['Z:\Stroke MC10\Clips\' subject(i,:) '\**\' location '*F_Feat.mat'])];
+    filenames=[filenames; rdir(['Z:\Stroke MC10\Clips\' subject(i,:) '\**\' location{n} '*F_Feat.mat'])];
 
     len(i) = length(filenames);
 end
@@ -35,11 +37,11 @@ for x = 1:size(subject,1)
         end
 
         f_new=f(:,[1:7 9:14]); %drop Sample Entropy
-        inds=strcmp('IA',lab);
-        f_new(inds,:)=[];
-        lab(inds)=[];
+%         inds=strcmp('IA',lab);
+%         f_new(inds,:)=[];
+%         lab(inds)=[];
 
-        if strcmp(location, 'Gastrocnemius')
+        if strcmp(location{n}, 'Gastrocnemius')
             PatientData.g{x} = f_new;
             PatientData.gLabel{x} = lab;
         else
@@ -59,11 +61,11 @@ for x = 1:size(subject,1)
         end
 
         f_new=f(:,[1:7 9:14]); %drop Sample Entropy
-        inds=strcmp('IA',lab);
-        f_new(inds,:)=[];
-        lab(inds)=[];
+%         inds=strcmp('IA',lab);
+%         f_new(inds,:)=[];
+%         lab(inds)=[];
 
-        if strcmp(location, 'Gastrocnemius')
+        if strcmp(location{n}, 'Gastrocnemius')
             PatientData.g{x} = f_new;
             PatientData.gLabel{x} = lab;
         else
@@ -75,6 +77,10 @@ for x = 1:size(subject,1)
         lab = [];
     end
 end
+end
+
+%save('PatientData.mat', 'PatientData')
+save('FullPatientData.mat', 'PatientData')
 %end
 
 %% PCA
