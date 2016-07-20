@@ -3,7 +3,7 @@
 Subj_CrossVal=0;
 
 nTrees=150;
-Activities={'Lying' 'Sitting' 'Stairs Down' 'Stairs Up' 'Standing' 'Walking'};
+Activities={'Lying' 'Sitting' 'Standing' 'Stairs Down' 'Stairs Up' 'Walking'};
 
 dirname = 'Z:\Stroke MC10\Activity Recognition\TrimmedData';
 
