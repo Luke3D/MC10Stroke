@@ -6,7 +6,7 @@ function RealConfMat = check(x, ConfMat)
 % matrix REALCONFMAT, a 6x6 confusion matrix representative of all the
 % original 6 activity labels.
 %--------------------------------------------------------------------------
-Activities={'Lying' 'Sitting' 'Stairs Down' 'Stairs Up' 'Standing' 'Walking'};
+Activities={'Lying' 'Sitting' 'Standing' 'Stairs Down' 'Stairs Up' 'Walking'};
 RealConfMat = [];
 
 N = length(ConfMat);
@@ -55,7 +55,7 @@ else
                 C = c2;
                 
                 
-            case 'Stairs Down'
+            case 'Standing'
                 c1(1:2,:) = c(1:2,:);
                 c1(3,:) = zeros(1,n);
                 c1(4:n+1,:) = c(3:end,:);
@@ -67,7 +67,7 @@ else
                 C = c2;
                 
                 
-            case 'Stairs Up'
+            case 'Stairs Down'
                 c1(1:3,:) = c(1:3,:);
                 c1(4,:) = zeros(1,n);
                 c1(5:n+1,:) = c(4:end,:);
@@ -79,7 +79,7 @@ else
                 C = c2;
                 
                 
-            case 'Standing'
+            case 'Stairs Up'
                 c1(1:4,:) = c(1:4,:);
                 c1(5,:) = zeros(1,n);
                 c1(6,:) = c(5,:);
