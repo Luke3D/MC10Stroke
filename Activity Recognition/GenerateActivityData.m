@@ -22,7 +22,10 @@ for indAct=1:length(Activities)
         filenames=dir([dirname 'Train\ACC\' Subj{indSub} '_' Activities{indAct} '*.csv']);
         AllData=[];
         for indFile=1:length(filenames)
-            Data=csvread([dirname 'Train\ACC\' filenames(indFile).name]);            
+            Data=csvread([dirname 'Train\ACC\' filenames(indFile).name]);
+            % remove extraneous zeros
+            zinds=max(abs(Data),[],2)==0;
+            Data(zinds,:)=[];
             AllData=[AllData; Data(windowLength*50+1:end-windowLength*50,:)];
         end
         csvwrite([dirname 'ActivityData\ACC\' Subj{indSub} '_' Activities{indAct} '_Train.csv'], AllData)
@@ -34,7 +37,10 @@ for indAct=1:length(Activities)
         filenames=dir([dirname 'Test\ACC\' Subj{indSub} '_' Activities{indAct} '*.csv']);
         AllData=[];
         for indFile=1:length(filenames)
-            Data=csvread([dirname 'Test\ACC\' filenames(indFile).name]);            
+            Data=csvread([dirname 'Test\ACC\' filenames(indFile).name]);
+            % remove extraneous zeros
+            zinds=max(abs(Data),[],2)==0;
+            Data(zinds,:)=[];
             AllData=[AllData; Data(windowLength*50+1:end-windowLength*50,:)];
         end
         csvwrite([dirname 'ActivityData\ACC\' Subj{indSub} '_' Activities{indAct} '_Test.csv'], AllData)
@@ -46,7 +52,10 @@ for indAct=1:length(Activities)
         filenames=dir([dirname 'Train\EMG\' Subj{indSub} '_' Activities{indAct} '*.csv']);
         AllData=[];
         for indFile=1:length(filenames)
-            Data=csvread([dirname 'Train\EMG\' filenames(indFile).name]);            
+            Data=csvread([dirname 'Train\EMG\' filenames(indFile).name]);
+            % remove extraneous zeros
+            zinds=max(abs(Data),[],2)==0;
+            Data(zinds,:)=[];
             AllData=[AllData; Data(windowLength*50+1:end-windowLength*50,:)];
         end
         csvwrite([dirname 'ActivityData\EMG\' Subj{indSub} '_' Activities{indAct} '_Train.csv'], AllData)
@@ -58,7 +67,10 @@ for indAct=1:length(Activities)
         filenames=dir([dirname 'Test\EMG\' Subj{indSub} '_' Activities{indAct} '*.csv']);
         AllData=[];
         for indFile=1:length(filenames)
-            Data=csvread([dirname 'Test\EMG\' filenames(indFile).name]);            
+            Data=csvread([dirname 'Test\EMG\' filenames(indFile).name]);
+            % remove extraneous zeros
+            zinds=max(abs(Data),[],2)==0;
+            Data(zinds,:)=[];
             AllData=[AllData; Data(windowLength*50+1:end-windowLength*50,:)];
         end
         csvwrite([dirname 'ActivityData\EMG\' Subj{indSub} '_' Activities{indAct} '_Test.csv'], AllData)
