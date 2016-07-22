@@ -10,9 +10,9 @@ Fs=250; % Sampling Frequency
 HPF=30; % Frequency for High-Pass filter on EMG data
 initBuff=3000; % Buffer window to take around Timestamps
 % Subjects to exclude from loop
-% RemoveSub={'CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007', 'CS008', 'CS009', 'CS010', 'CS011', 'CS012', 'CS013', 'CS014', 'CS015', ...
-%     'CS016', 'CS017', 'CS018', 'CS019', 'CS020', 'CS021', 'CS022', 'CS023'};%, 'CS024', 'CS025', 'CS026', 'CS027', 'CS028', 'CS029', 'CS030'};
-RemoveSub={};
+RemoveSub={'CS001' 'CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007', 'CS008', 'CS009', 'CS010', 'CS011', 'CS012', 'CS013', 'CS014', 'CS015', ...
+    'CS016', 'CS017', 'CS018', 'CS019', 'CS020', 'CS022', 'CS023', 'CS025', 'CS026', 'CS028'};
+% RemoveSub={};
 dirname='Z:\Stroke MC10\';
 Locations={'Gastrocnemius' 'Hamstring'};
 
@@ -39,6 +39,7 @@ for indDir=1:length(filenames)
         load([dirname subject '\Lab Day ' numDay '\' subject '_Day' numDay '_Times.mat'])
     % Loop through activity list in Times
     for i=1:height(Times)
+        accel=[];
         for indLoc=1:length(Locations)
             startStamp=datetime(1970, 1, 1, 0, 0, Times.Start(i)/1000);
 
@@ -93,8 +94,19 @@ for indDir=1:length(filenames)
             
             % Only load accel data from Gastrocs
             if strcmp(Locations{indLoc},'Gastrocnemius')
-                accel=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
-                    '\' datafiles(ind).name '\sensors\accel.csv']);
+                if exist([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} '\' datafiles(ind).name '\sensors\accel.csv'],'file')
+                    accel=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
+                        '\' datafiles(ind).name '\sensors\accel.csv']);
+                else
+                    accel=[];
+                end
+            end
+            
+            if isempty(accel)
+                continue
+            end
+            if ~exist('accel','var')
+                continue
             end
             
             % Identify start and end indices in data
@@ -124,6 +136,10 @@ for indDir=1:length(filenames)
                 [~,Start]=min(abs(accel(:,1)-Times.Start(i)+initBuff));
                 [~,Stop]=min(abs(accel(:,1)-Times.End(i)-initBuff));
 
+                if Start-Stop==0
+                    continue
+                end
+                
                 ACC=accel(Start:Stop,:);
                 ACC(:,1)=(ACC(:,1))/1000;
 
