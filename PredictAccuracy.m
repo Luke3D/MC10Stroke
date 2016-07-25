@@ -2,11 +2,11 @@
 load('FullPatientData.mat')
 
 N = {'h' 'g'};
-n = [15, 27];
+n = [18, 29];
 nTrees = 50;
 y = 1;
 
-inclInactive = 0;
+inclInactive = 1;
 
 if ~inclInactive
     num = 2;
@@ -152,7 +152,7 @@ end
 % Prints initial results of data analysis
 %--------------------------------------------------------------------------
 
-H_BagTreeAvg = mean(accuracy(1,1:15));  % Only elements 1-15 have data
+H_BagTreeAvg = mean(accuracy(1,1:18));  % Only elements 1-20 have data
 G_BagTreeAvg = mean(accuracy(2,:));
 
 BT_Avg = mean([H_BagTreeAvg G_BagTreeAvg]);
