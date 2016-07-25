@@ -4,7 +4,7 @@ emg = []; lab = [];
 location = {'Gastrocnemius' 'Hamstring'};
 dirname = 'Z:\Stroke MC10\LabeledData\CS0';
 
-subject{1}=([1:20 23:29])'; % Gastrocnemius index
+subject{1}=([1:21 23:30])'; % Gastrocnemius index
 subject{2}=([1:15])'; % Hamstring index
 
 %--------------------------------------------------------------------------
