@@ -4,7 +4,6 @@ load('FullPatientData.mat')
 N = {'h' 'g'};
 n = [18, 29];
 nTrees = 50;
-y = 1;
 
 inclInactive = 1;
 
@@ -92,8 +91,6 @@ for ii = 1:2
         tempData = [];
         tempLabels = [];
      end
-
-     tempMat = zeros(length(ConfMat{ii,jj}));
      
      for jj = 1:n(ii)
          x = unique(LabelsRF);
@@ -107,12 +104,14 @@ for ii = 1:2
          end
      end
      
+     tempMat = zeros(length(RealConfMat{ii,jj}));
+     
      for jj = 1:n(ii)
          tempMat = tempMat + RealConfMat{ii,jj};
      end
      
      TrueConf{ii} = tempMat;
-     tempMat = zeros(length(ConfMat{ii,jj}));
+     tempMat = zeros(length(RealConfMat{ii,jj}));
      
 end
 
