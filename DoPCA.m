@@ -1,7 +1,7 @@
 close all
 
-Sub{1}=([1:14 19]).'; % Hamstring index
-Sub{2}=([1:20 23:29]).';   % For Hamstring, 15-18 have no hamstring data (6/27/16)
+Sub{1}=([1:14 19 21 24 29]).'; % Hamstring index
+Sub{2}=([1:21 23:30]).';
 
 
 location={'Hamstring' 'Gastrocnemius'};
