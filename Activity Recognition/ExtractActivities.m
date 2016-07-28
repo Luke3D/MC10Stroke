@@ -12,7 +12,7 @@ Act_Labels=readtable('Z:\Stroke MC10\Activity Recognition\Labels_stroke.csv', 'R
 % hamFilenames=rdir('Z:\Stroke MC10\CS*\**\Hamstring\**\accel.csv');
 % hamFilenames={hamFilenames.name}.';
 
-for indLab=1:height(Act_Labels)
+for indLab=1122:height(Act_Labels)
     
     startStamp=datetime(1970, 1, 1, 0, 0, Act_Labels.Var3(indLab)/1000);
     

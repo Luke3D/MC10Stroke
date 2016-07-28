@@ -6,7 +6,7 @@
 
 clear all
 
-filenames=rdir('Z:\Stroke MC10\LabeledData\**\*.csv');
+filenames=rdir('Z:\Stroke MC10\LabeledData\CS030\**\*.csv');
 
 clipLength=.5;
 Fs=250;
@@ -53,6 +53,9 @@ for indF=1:length(filenames)
         M=sum(cellfun(@(x) strcmp(x,'Misc'),table2cell(Data(indStart:indEnd,indLab))))...
             +sum(cellfun(@(x) strcmp(x,'Not labeled'),table2cell(Data(indStart:indEnd,indLab))));
         
+        if SA>0
+            dummy=1;
+        end
         % Assign most common label to clip
         if M>0
             skips=skips+1;
