@@ -12,7 +12,7 @@ load('AshworthScores.mat')
 KElab = []; PFlab = [];
 KEval = []; PFval = [];
 
-for ii = 1:15
+for ii = 1:18
     if ii == 15
         if strcmp(Ashworth{19}.KE, '1+')
             KElab = [KElab; Ashworth{19}.KE];
@@ -32,7 +32,7 @@ for ii = 1:15
     end
 end
 
-for jj = [1:20 23:29]
+for jj = [1:21 23:30]
     if strcmp(Ashworth{jj}.PF, '1+')
         PFlab = [PFlab; Ashworth{jj}.PF];
         PFval(jj) = 1.5;
@@ -43,13 +43,13 @@ for jj = [1:20 23:29]
 end
 
 
-PFval = PFval([1:20 23:29]);
+PFval = PFval([1:21 23:30]);
 
-hamstring_bt = 100*accuracy(1,1:15);
-x1 = 1:15;
+hamstring_bt = 100*accuracy(1,1:18);
+x1 = 1:18;
 
 gastro_bt = 100*accuracy(2,:);
-x2 = 1:27;
+x2 = 1:29;
 
 a1 = mean(hamstring_bt);
 a2 = mean(gastro_bt);
@@ -71,7 +71,7 @@ text(1:2,A',num2str(A','%4.2f'),...
 'HorizontalAlignment','center', 'VerticalAlignment','middle')
 
 figure
-gscatter(KEval, 100*accuracy(1,[1:14 19]), KElab)
+gscatter(KEval, 100*accuracy(1,1:18), KElab)
 ax = gca;
 ax.XTick = [0 1 1.5 2 3];
 ax.XTickLabel = {'0', '1', '1+', '2', '3'};
@@ -91,7 +91,7 @@ xlabel('Asworth Scores')
 ylabel('Model Accuracy [%]')
 
 ash = [KEval PFval];
-acy = [100*accuracy(1,[1:14 19]) 100*accuracy(2,:)];
+acy = [100*accuracy(1,1:18) 100*accuracy(2,:)];
 labels = [KElab; PFlab];
 
 p = polyfit(ash, acy, 2);

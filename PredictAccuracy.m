@@ -2,11 +2,11 @@
 load('FullPatientData.mat')
 
 N = {'h' 'g'};
-n = [15, 27];
+n = [17, 29];
 nTrees = 50;
-y = 1;
+index = [];
 
-inclInactive = 0;
+inclInactive = 1;
 
 if ~inclInactive
     num = 2;
@@ -47,20 +47,20 @@ end
     
 for ii = 1:2
      for jj = 1:n(ii)
-%         for kk = 1:30
-%             if kk ~= jj
-%                 trainingData = [trainingData; PatientData.([N{ii}]){kk}];
-%                 trainingLabels = [trainingLabels; PatientData.([N{ii} 'Label']){kk}];
-%             end
-%         end
+         
         tempData = PatientData.([N{ii}]);
         tempLabels = PatientData.([N{ii} 'Label']);
         tempData(jj) = [];
         tempLabels(jj) = [];
         
-        parfor kk = 1:length(tempData)
-            trainingData=[trainingData; tempData{kk}];
-            trainingLabels=[trainingLabels; tempLabels{kk}];
+        for kk = 1:length(tempData)
+            if sum(strcmp(tempLabels{kk}, 'SA')) == 0
+                continue
+            else
+                trainingData = [trainingData; tempData{kk}];
+                trainingLabels = [trainingLabels; tempLabels{kk}];
+            end
+            
         end
         
         testData = PatientData.([N{ii}]){jj};
@@ -69,19 +69,8 @@ for ii = 1:2
         RFModel = TreeBagger(nTrees, trainingData, trainingLabels);
         [LabelsRF, P1, RF1] = predict(RFModel, testData);
         
-        ConfMat{ii,jj}=confusionmat(testLabels, LabelsRF);
+        ConfMat{ii,jj} = confusionmat(testLabels, LabelsRF);
         accuracy(ii,jj) = mean(strcmp(testLabels, LabelsRF));
-        
-%         testLabels = char(testLabels);
-%         testLabels = testLabels(:,1);
-%         testLabels = oneHot(testLabels);
-%         
-%         LabelsRF = char(LabelsRF);
-%         LabelsRF = LabelsRF(:,1);
-%         LabelsRF = oneHot(LabelsRF);
-%         
-%         subplot(4,4,y)
-%         plotconfusion(testLabels, LabelsRF);
 
         trainingData = [];
         trainingLabels = [];
@@ -92,8 +81,6 @@ for ii = 1:2
         tempData = [];
         tempLabels = [];
      end
-
-     tempMat = zeros(length(ConfMat{ii,jj}));
      
      for jj = 1:n(ii)
          x = unique(LabelsRF);
@@ -107,12 +94,14 @@ for ii = 1:2
          end
      end
      
+     tempMat = zeros(length(RealConfMat{ii,jj}));
+     
      for jj = 1:n(ii)
          tempMat = tempMat + RealConfMat{ii,jj};
      end
      
      TrueConf{ii} = tempMat;
-     tempMat = zeros(length(ConfMat{ii,jj}));
+     tempMat = zeros(length(RealConfMat{ii,jj}));
      
 end
 
@@ -152,7 +141,7 @@ end
 % Prints initial results of data analysis
 %--------------------------------------------------------------------------
 
-H_BagTreeAvg = mean(accuracy(1,1:15));  % Only elements 1-15 have data
+H_BagTreeAvg = mean(accuracy(1,1:17));
 G_BagTreeAvg = mean(accuracy(2,:));
 
 BT_Avg = mean([H_BagTreeAvg G_BagTreeAvg]);
