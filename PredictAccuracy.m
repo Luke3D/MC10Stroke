@@ -2,8 +2,9 @@
 load('FullPatientData.mat')
 
 N = {'h' 'g'};
-n = [18, 29];
+n = [17, 29];
 nTrees = 50;
+index = [];
 
 inclInactive = 1;
 
@@ -46,20 +47,20 @@ end
     
 for ii = 1:2
      for jj = 1:n(ii)
-%         for kk = 1:30
-%             if kk ~= jj
-%                 trainingData = [trainingData; PatientData.([N{ii}]){kk}];
-%                 trainingLabels = [trainingLabels; PatientData.([N{ii} 'Label']){kk}];
-%             end
-%         end
+         
         tempData = PatientData.([N{ii}]);
         tempLabels = PatientData.([N{ii} 'Label']);
         tempData(jj) = [];
         tempLabels(jj) = [];
         
-        parfor kk = 1:length(tempData)
-            trainingData=[trainingData; tempData{kk}];
-            trainingLabels=[trainingLabels; tempLabels{kk}];
+        for kk = 1:length(tempData)
+            if sum(strcmp(tempLabels{kk}, 'SA')) == 0
+                continue
+            else
+                trainingData = [trainingData; tempData{kk}];
+                trainingLabels = [trainingLabels; tempLabels{kk}];
+            end
+            
         end
         
         testData = PatientData.([N{ii}]){jj};
@@ -68,19 +69,8 @@ for ii = 1:2
         RFModel = TreeBagger(nTrees, trainingData, trainingLabels);
         [LabelsRF, P1, RF1] = predict(RFModel, testData);
         
-        ConfMat{ii,jj}=confusionmat(testLabels, LabelsRF);
+        ConfMat{ii,jj} = confusionmat(testLabels, LabelsRF);
         accuracy(ii,jj) = mean(strcmp(testLabels, LabelsRF));
-        
-%         testLabels = char(testLabels);
-%         testLabels = testLabels(:,1);
-%         testLabels = oneHot(testLabels);
-%         
-%         LabelsRF = char(LabelsRF);
-%         LabelsRF = LabelsRF(:,1);
-%         LabelsRF = oneHot(LabelsRF);
-%         
-%         subplot(4,4,y)
-%         plotconfusion(testLabels, LabelsRF);
 
         trainingData = [];
         trainingLabels = [];
@@ -151,7 +141,7 @@ end
 % Prints initial results of data analysis
 %--------------------------------------------------------------------------
 
-H_BagTreeAvg = mean(accuracy(1,1:18));  % Only elements 1-20 have data
+H_BagTreeAvg = mean(accuracy(1,1:17));
 G_BagTreeAvg = mean(accuracy(2,:));
 
 BT_Avg = mean([H_BagTreeAvg G_BagTreeAvg]);
