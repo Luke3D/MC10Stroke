@@ -1,6 +1,6 @@
 close all
 
-Sub{1}=([1:14 19 21 24 29]).'; % Hamstring index
+Sub{1}=([1:14 19 24 29]).'; % Hamstring index
 Sub{2}=([1:21 23:30]).';
 
 
@@ -35,7 +35,11 @@ for x = 1:size(subject,1)
             f = [f; cell2mat({Features(:).Features}')];
             lab = [lab; {Features(:).ActivityLabel}'];
         end
-
+        
+        if isempty(f)
+            continue
+        end
+        
         f_new=f(:,[1:7 9:14]); %drop Sample Entropy
 %         inds=strcmp('IA',lab);
 %         f_new(inds,:)=[];
@@ -59,7 +63,11 @@ for x = 1:size(subject,1)
             f = [f; cell2mat({Features(:).Features}')];
             lab = [lab; {Features(:).ActivityLabel}'];
         end
-
+        
+        if isempty(f)
+            continue
+        end
+        
         f_new=f(:,[1:7 9:14]); %drop Sample Entropy
 %         inds=strcmp('IA',lab);
 %         f_new(inds,:)=[];
