@@ -1,6 +1,6 @@
 %% Train classifier based on MC10 data from Phone Labels
 % Run after GenerateClips.m
-Subj_CrossVal=0;
+Subj_CrossVal=1;
 
 nTrees=150;
 Activities={'Lying' 'Sitting' 'Standing' 'Stairs Down' 'Stairs Up' 'Walking'};
@@ -48,7 +48,7 @@ if ~Subj_CrossVal
     
 else
     for indFold=1:length(Test)
-        if isempty(Test(indFold).Features)
+        if isempty(Test(indFold).Features) && isempty(Train(indFold).Features)
             continue
         end
         
@@ -62,12 +62,18 @@ else
             Feat=[Feat; temp(i).Features];
             Label=[Label temp(i).ActivityLabel];
         end
+        for i=1:length(Test)
+            if i~=indFold
+                Feat=[Feat; Test(i).Features];
+                Label=[Label Test(i).ActivityLabel];
+            end
+        end
 
         TrainFeat=Feat;
         TrainLabel=Label.';
         
-        TestFeat=Test(indFold).Features;
-        TestLabel=Test(indFold).ActivityLabel;        
+        TestFeat=[Test(indFold).Features; Train(indFold).Features];
+        TestLabel=[Test(indFold).ActivityLabel Train(indFold).ActivityLabel];        
         TestLabel=TestLabel.';
         
         RFModel=TreeBagger(nTrees, TrainFeat, TrainLabel);

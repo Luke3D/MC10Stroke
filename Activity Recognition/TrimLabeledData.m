@@ -13,7 +13,7 @@ Activities={'Lying' 'Sitting' 'Standing' 'Stairs Up' 'Stairs Down' 'Walking'};
 Set={'Train' 'Test'};
 for indSet=1:length(Set)
     
-    filenames=dir([dirname 'RawData\' Set{indSet} '\ACC\*.csv']);
+    filenames=dir([dirname 'RawData\' Set{indSet} '\ACC\CS030*.csv']);
 
     for indFile=1:length(filenames)
         Data=csvread([dirname 'RawData\' Set{indSet} '\ACC\' filenames(indFile).name]);
