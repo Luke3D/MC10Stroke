@@ -76,6 +76,10 @@ for ii = 1:2
             HA=find(cellfun(@(x) strcmp(x,'HA'), testLabels));
             IA=find(cellfun(@(x) strcmp(x,'IA'), testLabels));
 
+            % sort data (use if not resampling test set
+%             testData=testData([SA; HA; IA],:);
+%             testLabels=testLabels([SA; HA; IA],:);
+            
             SA_count=length(SA);
             HA_count=length(HA);
             IA_count=length(IA);
@@ -86,43 +90,43 @@ for ii = 1:2
                 continue
             end
             
-%             if IA_count>0
-%                 resamp_count=min([SA_count HA_count IA_count]);
-%                 IA_inds=randperm(IA_count,resamp_count);
-%             else
-%                 resamp_count=min([SA_count HA_count]);
-%                 IA_inds=[];
-%             end
-% 
-%             SA_inds=randperm(SA_count,resamp_count);
-%             HA_inds=randperm(HA_count,resamp_count);  
-% 
-%             testData=testData([SA(SA_inds); HA(HA_inds); IA(IA_inds)],:);
-%             testLabels=testLabels([SA(SA_inds); HA(HA_inds); IA(IA_inds)]);
+            if IA_count>0
+                resamp_count=min([SA_count HA_count IA_count]);
+                IA_inds=randperm(IA_count,resamp_count);
+            else
+                resamp_count=min([SA_count HA_count]);
+                IA_inds=[];
+            end
+
+            SA_inds=randperm(SA_count,resamp_count);
+            HA_inds=randperm(HA_count,resamp_count);  
+
+            testData=testData([SA(SA_inds); HA(HA_inds); IA(IA_inds)],:);
+            testLabels=testLabels([SA(SA_inds); HA(HA_inds); IA(IA_inds)]);
 
             % training data
             
-%             SA=find(cellfun(@(x) strcmp(x,'SA'), trainingLabels));
-%             HA=find(cellfun(@(x) strcmp(x,'HA'), trainingLabels));
-%             IA=find(cellfun(@(x) strcmp(x,'IA'), trainingLabels));
-% 
-%             SA_count=length(SA);
-%             HA_count=length(HA);
-%             IA_count=length(IA);
-% 
-%             if IA_count>0
-%                 resamp_count=min([SA_count HA_count IA_count]);
-%                 IA_inds=randperm(IA_count,resamp_count);
-%             else
-%                 resamp_count=min([SA_count HA_count]);
-%                 IA_inds=[];
-%             end
-% 
-%             SA_inds=randperm(SA_count,resamp_count);
-%             HA_inds=randperm(HA_count,resamp_count*2);  
-%         
-%             trainingData=trainingData([SA(SA_inds); HA(HA_inds); IA(IA_inds)],:);
-%             trainingLabels=trainingLabels([SA(SA_inds); HA(HA_inds); IA(IA_inds)]);
+            SA=find(cellfun(@(x) strcmp(x,'SA'), trainingLabels));
+            HA=find(cellfun(@(x) strcmp(x,'HA'), trainingLabels));
+            IA=find(cellfun(@(x) strcmp(x,'IA'), trainingLabels));
+
+            SA_count=length(SA);
+            HA_count=length(HA);
+            IA_count=length(IA);
+
+            if IA_count>0
+                resamp_count=min([SA_count HA_count IA_count]);
+                IA_inds=randperm(IA_count,resamp_count);
+            else
+                resamp_count=min([SA_count HA_count]);
+                IA_inds=[];
+            end
+
+            SA_inds=randperm(SA_count,resamp_count);
+            HA_inds=randperm(HA_count,min(resamp_count,HA_count));  
+        
+            trainingData=trainingData([SA(SA_inds); HA(HA_inds); IA(IA_inds)],:);
+            trainingLabels=trainingLabels([SA(SA_inds); HA(HA_inds); IA(IA_inds)]);
         
         RFModel = TreeBagger(nTrees, trainingData, trainingLabels);
         [LabelsRF, P1, RF1] = predict(RFModel, testData);
