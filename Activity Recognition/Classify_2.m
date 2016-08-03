@@ -1,6 +1,17 @@
 %% Train classifier based on MC10 data from Phone Labels
 % Run after GenerateClips.m
+
+clear all
+
 Subj_CrossVal=1;
+Use_EMG=1;
+if Use_EMG
+    numFeat=1:291;
+else
+    numFeat=1:277;
+end
+% numFeat=1:137;
+% numFeat=137:274;
 
 nTrees=150;
 Activities={'Lying' 'Sitting' 'Standing' 'Stairs Down' 'Stairs Up' 'Walking'};
@@ -76,8 +87,8 @@ else
         TestLabel=[Test(indFold).ActivityLabel Train(indFold).ActivityLabel];        
         TestLabel=TestLabel.';
         
-        RFModel=TreeBagger(nTrees, TrainFeat, TrainLabel);
-        [LabelsRF,P_RF] = predict(RFModel,TestFeat);
+        RFModel=TreeBagger(nTrees, TrainFeat(:,numFeat), TrainLabel);
+        [LabelsRF,P_RF] = predict(RFModel,TestFeat(:,numFeat));
         
         ConfMat{indFold}(:,:) = confusionmat(TestLabel, LabelsRF);
 

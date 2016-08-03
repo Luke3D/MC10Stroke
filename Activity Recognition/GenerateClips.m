@@ -2,7 +2,7 @@
 % Run after GenerateActivityData.m
 clear all
 
-clipLength=5;
+clipLength=2.5;
 Fs=50;
 clipOverlap=.5;
 
@@ -31,15 +31,16 @@ for indSub=1:length(Subj)
             'ReadVariableNames',false);
         EMG=readtable([dirname '\ActivityData\EMG\' Subj{indSub} '_' Activities{indAct} '_train.csv'],...
             'ReadVariableNames',false);
-        numClips=floor((height(Data)-overlapSize)/(clipSize-overlapSize));
+        numClips=floor((height(EMG)/5-overlapSize)/(clipSize-overlapSize));
         
         for indClip=1:numClips
             clip=cell2mat(table2cell(Data(...
                 (indClip-1)*(clipSize-overlapSize)+1:(indClip-1)*(clipSize-overlapSize)+clipSize,:)));
             EMG_clip=cell2mat(table2cell(EMG(...
-                5*(indClip-1)*(clipSize-overlapSize)+1:5*(indClip-1)*(clipSize-overlapSize)+clipSize,:)));
+                5*(indClip-1)*(clipSize-overlapSize)+1:5*(indClip-1)*(clipSize-overlapSize)+5*clipSize,:)));
             X=mean(cross(clip(:,1:3),clip(:,4:6)));
-            Feat=[getFeatures(clip(:,1:3).') getFeatures(clip(:,4:6).') X/norm(X) ...
+            Y=mean(dot(clip(:,1:3),clip(:,4:6)));
+            Feat=[getFeatures(clip(:,1:3).') getFeatures(clip(:,4:6).') X/norm(X) Y ...
                 getEMGFeatures(EMG_clip(:,1).') getEMGFeatures(EMG_clip(:,2).')];
             SubjFeat=[SubjFeat; Feat];
             Label{end+1}=Activities{indAct};
@@ -60,15 +61,16 @@ for indSub=1:length(Subj)
             'ReadVariableNames',false);
         EMG=readtable([dirname '\ActivityData\EMG\' Subj{indSub} '_' Activities{indAct} '_test.csv'],...
             'ReadVariableNames',false);
-        numClips=floor((height(Data)-overlapSize)/(clipSize-overlapSize));
+        numClips=floor((height(EMG)/5-overlapSize)/(clipSize-overlapSize));
         
         for indClip=1:numClips
             clip=cell2mat(table2cell(Data(...
                 (indClip-1)*(clipSize-overlapSize)+1:(indClip-1)*(clipSize-overlapSize)+clipSize,:)));
             EMG_clip=cell2mat(table2cell(EMG(...
-                5*(indClip-1)*(clipSize-overlapSize)+1:5*(indClip-1)*(clipSize-overlapSize)+clipSize,:)));
+                5*(indClip-1)*(clipSize-overlapSize)+1:5*(indClip-1)*(clipSize-overlapSize)+5*clipSize,:)));
             X=mean(cross(clip(:,1:3),clip(:,4:6)));
-            Feat=[getFeatures(clip(:,1:3).') getFeatures(clip(:,4:6).') X/norm(X) ...
+            Y=mean(dot(clip(:,1:3),clip(:,4:6)));
+            Feat=[getFeatures(clip(:,1:3).') getFeatures(clip(:,4:6).') X/norm(X) Y/norm(Y) ...
                 getEMGFeatures(EMG_clip(:,1).') getEMGFeatures(EMG_clip(:,2).')];
             SubjFeat=[SubjFeat; Feat];
             Label{end+1}=Activities{indAct};
