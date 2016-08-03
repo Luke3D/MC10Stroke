@@ -1,4 +1,6 @@
 %load('PatientData.mat')
+clear all
+
 load('FullPatientData.mat')
 
 N = {'h' 'g'};
@@ -6,7 +8,7 @@ n = [17, 29];
 nTrees = 50;
 index = [];
 
-inclInactive = 1;
+inclInactive = 0;
 
 if ~inclInactive
     num = 2;
@@ -66,6 +68,62 @@ for ii = 1:2
         testData = PatientData.([N{ii}]){jj};
         testLabels = PatientData.([N{ii} 'Label']){jj};
         
+        
+        % Resample test and train sets to size of smallest set
+            % test data
+            
+            SA=find(cellfun(@(x) strcmp(x,'SA'), testLabels));
+            HA=find(cellfun(@(x) strcmp(x,'HA'), testLabels));
+            IA=find(cellfun(@(x) strcmp(x,'IA'), testLabels));
+
+            SA_count=length(SA);
+            HA_count=length(HA);
+            IA_count=length(IA);
+
+            if SA_count==0
+                ConfMat{ii,jj}=[];
+                accuracy(ii,jj)=NaN;
+                continue
+            end
+            
+%             if IA_count>0
+%                 resamp_count=min([SA_count HA_count IA_count]);
+%                 IA_inds=randperm(IA_count,resamp_count);
+%             else
+%                 resamp_count=min([SA_count HA_count]);
+%                 IA_inds=[];
+%             end
+% 
+%             SA_inds=randperm(SA_count,resamp_count);
+%             HA_inds=randperm(HA_count,resamp_count);  
+% 
+%             testData=testData([SA(SA_inds); HA(HA_inds); IA(IA_inds)],:);
+%             testLabels=testLabels([SA(SA_inds); HA(HA_inds); IA(IA_inds)]);
+
+            % training data
+            
+%             SA=find(cellfun(@(x) strcmp(x,'SA'), trainingLabels));
+%             HA=find(cellfun(@(x) strcmp(x,'HA'), trainingLabels));
+%             IA=find(cellfun(@(x) strcmp(x,'IA'), trainingLabels));
+% 
+%             SA_count=length(SA);
+%             HA_count=length(HA);
+%             IA_count=length(IA);
+% 
+%             if IA_count>0
+%                 resamp_count=min([SA_count HA_count IA_count]);
+%                 IA_inds=randperm(IA_count,resamp_count);
+%             else
+%                 resamp_count=min([SA_count HA_count]);
+%                 IA_inds=[];
+%             end
+% 
+%             SA_inds=randperm(SA_count,resamp_count);
+%             HA_inds=randperm(HA_count,resamp_count*2);  
+%         
+%             trainingData=trainingData([SA(SA_inds); HA(HA_inds); IA(IA_inds)],:);
+%             trainingLabels=trainingLabels([SA(SA_inds); HA(HA_inds); IA(IA_inds)]);
+        
         RFModel = TreeBagger(nTrees, trainingData, trainingLabels);
         [LabelsRF, P1, RF1] = predict(RFModel, testData);
         
@@ -85,7 +143,11 @@ for ii = 1:2
      for jj = 1:n(ii)
          x = unique(LabelsRF);
          
-         RealConfMat{ii,jj} = checkLab(x, ConfMat{ii,jj}, num);
+         if ~isempty(ConfMat{ii,jj})
+             RealConfMat{ii,jj} = checkLab(x, ConfMat{ii,jj}, num);
+         else    
+             RealConfMat{ii,jj} = zeros(2);
+         end
          
          for kk = 1:numel(RealConfMat{ii,jj})
              if isnan(RealConfMat{ii,jj}(kk))
@@ -141,8 +203,8 @@ end
 % Prints initial results of data analysis
 %--------------------------------------------------------------------------
 
-H_BagTreeAvg = mean(accuracy(1,1:17));
-G_BagTreeAvg = mean(accuracy(2,:));
+H_BagTreeAvg = nanmean(accuracy(1,1:17));
+G_BagTreeAvg = nanmean(accuracy(2,:));
 
 BT_Avg = mean([H_BagTreeAvg G_BagTreeAvg]);
 
