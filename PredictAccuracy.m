@@ -1,9 +1,9 @@
 %load('PatientData.mat')
-clear all
+% clear all
 
 RUS=1;
 
-load('FullPatientData.mat')
+% load('FullPatientData.mat')
 
 N = {'h' 'g'};
 n = [17, 29];
@@ -94,6 +94,7 @@ for ii = 1:2
             if SA_count==0
                 ConfMat{ii,jj}=[];
                 accuracy(ii,jj)=NaN;
+                balacc(ii,jj)=NaN;
                 continue
             end
             
@@ -147,6 +148,7 @@ for ii = 1:2
         
         ConfMat{ii,jj} = confusionmat(testLabels, LabelsRF);
         accuracy(ii,jj) = mean(strcmp(testLabels, LabelsRF));
+        balacc(ii,jj) = mean(diag(ConfMat{ii,jj})./sum(ConfMat{ii,jj},2));
 
         trainingData = [];
         trainingLabels = [];

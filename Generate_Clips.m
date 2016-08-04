@@ -6,14 +6,11 @@
 
 clear all
 
-filenames=rdir('Z:\Stroke MC10\LabeledData\CS030\**\*.csv');
+filenames=rdir('Z:\Stroke MC10\LabeledData\**\*.csv');
 
-clipLength=.5;
+clipLength=[1 1]; % Ham/Gas
 Fs=250;
-clipOverlap=.75;
-
-clipSize=ceil(clipLength*Fs);
-overlapSize=ceil(clipOverlap*clipSize);
+clipOverlap=[.9 .9]; % Ham/Gas
 
 for indF=1:length(filenames)
     Data=readtable(filenames(indF).name,'ReadVariableNames',false);
@@ -24,8 +21,12 @@ for indF=1:length(filenames)
     
     if strfind(filename,'Hamstring')
         indLab=9;
+        clipSize=ceil(clipLength(1)*Fs);
+        overlapSize=ceil(clipOverlap(1)*clipSize);
     else
         indLab=6;
+        clipSize=ceil(clipLength(2)*Fs);
+        overlapSize=ceil(clipOverlap(2)*clipSize);
     end
     
     EMG=cell2mat(table2cell(Data(:,2)));
