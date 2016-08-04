@@ -1,6 +1,8 @@
 %load('PatientData.mat')
 clear all
 
+RUS=1;
+
 load('FullPatientData.mat')
 
 N = {'h' 'g'};
@@ -111,30 +113,37 @@ for ii = 1:2
 
             % training data
             
-            SA=find(cellfun(@(x) strcmp(x,'SA'), trainingLabels));
-            HA=find(cellfun(@(x) strcmp(x,'HA'), trainingLabels));
-            IA=find(cellfun(@(x) strcmp(x,'IA'), trainingLabels));
-
-            SA_count=length(SA);
-            HA_count=length(HA);
-            IA_count=length(IA);
-
-            if IA_count>0
-                resamp_count=min([SA_count HA_count IA_count]);
-                IA_inds=randperm(IA_count,resamp_count);
-            else
-                resamp_count=min([SA_count HA_count]);
-                IA_inds=[];
-            end
-
-            SA_inds=randperm(SA_count,resamp_count);
-            HA_inds=randperm(HA_count,min(resamp_count,HA_count));  
+%             SA=find(cellfun(@(x) strcmp(x,'SA'), trainingLabels));
+%             HA=find(cellfun(@(x) strcmp(x,'HA'), trainingLabels));
+%             IA=find(cellfun(@(x) strcmp(x,'IA'), trainingLabels));
+% 
+%             SA_count=length(SA);
+%             HA_count=length(HA);
+%             IA_count=length(IA);
+% 
+%             if IA_count>0
+%                 resamp_count=min([SA_count HA_count IA_count]);
+%                 IA_inds=randperm(IA_count,resamp_count);
+%             else
+%                 resamp_count=min([SA_count HA_count]);
+%                 IA_inds=[];
+%             end
+% 
+%             SA_inds=randperm(SA_count,resamp_count);
+%             HA_inds=randperm(HA_count,min(resamp_count*3,HA_count));  
+%         
+%             trainingData=trainingData([SA(SA_inds); HA(HA_inds); IA(IA_inds)],:);
+%             trainingLabels=trainingLabels([SA(SA_inds); HA(HA_inds); IA(IA_inds)]);
+     
+        if RUS
+            t = templateTree('MinLeafSize',5);
+            Model = fitensemble(trainingData, trainingLabels, 'RUSBoost', 1000,t,'LearnRate',.1);
+        else
+            Model = TreeBagger(nTrees, trainingData, trainingLabels);
+        end
         
-            trainingData=trainingData([SA(SA_inds); HA(HA_inds); IA(IA_inds)],:);
-            trainingLabels=trainingLabels([SA(SA_inds); HA(HA_inds); IA(IA_inds)]);
-        
-        RFModel = TreeBagger(nTrees, trainingData, trainingLabels);
-        [LabelsRF, P1, RF1] = predict(RFModel, testData);
+%         [LabelsRF, P1, RF1] = predict(Model, testData);
+        LabelsRF = predict(Model, testData);
         
         ConfMat{ii,jj} = confusionmat(testLabels, LabelsRF);
         accuracy(ii,jj) = mean(strcmp(testLabels, LabelsRF));
