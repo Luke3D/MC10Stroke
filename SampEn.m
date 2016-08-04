@@ -43,7 +43,7 @@ for m = dim:dim+1
         % for modified sample entropy (mSampEn) calculation
         D = (dist < r);
         
-        count(i) = sum(D)/(N-dim);
+        count(i) = (sum(D)+1)/(N-dim);
     end
     
     correl(m-dim+1) = sum(count)/(N-dim);

@@ -42,7 +42,8 @@ for x = 1:size(subject,1)
             continue
         end
         
-        f_new=f(:,[1:7 9:14]); %drop Sample Entropy
+%         f_new=f(:,[1:7 9:14]); %drop Sample Entropy
+        f_new=f;
 %         inds=strcmp('IA',lab);
 %         f_new(inds,:)=[];
 %         lab(inds)=[];
@@ -70,7 +71,8 @@ for x = 1:size(subject,1)
             continue
         end
         
-        f_new=f(:,[1:7 9:14]); %drop Sample Entropy
+        f_new=f;
+%         f_new=f(:,[1:7 9:14]); %drop Sample Entropy
 %         inds=strcmp('IA',lab);
 %         f_new(inds,:)=[];
 %         lab(inds)=[];
@@ -90,7 +92,7 @@ end
 end
 
 % save('PatientData.mat', 'PatientData')
-% save('FullPatientData.mat', 'PatientData')
+save('FullPatientData.mat', 'PatientData')
 %end
 
 %% PCA

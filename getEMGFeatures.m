@@ -62,8 +62,8 @@ for i=1:size(X,1)
 %     end
 %     
 %     %Sample Entropy
-    r = 0.5*std(x);    %tolerance = 0.2*std
-    fvec = [fvec SampEn(1,r,x.')];
+    r = 0.2*std(x);    %tolerance = 0.2*std
+    fvec = [fvec SampEn(2,r,x.')];
     flab = [flab; '-SampEn'];
 %     
 
