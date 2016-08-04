@@ -68,6 +68,11 @@ for ii = 1:2
         testData = PatientData.([N{ii}]){jj};
         testLabels = PatientData.([N{ii} 'Label']){jj};
         
+        if isempty(testData)
+            ConfMat{ii,jj}=[];
+            accuracy(ii,jj)=NaN;
+            continue
+        end
         
         % Resample test and train sets to size of smallest set
             % test data
@@ -207,8 +212,8 @@ end
 % Prints initial results of data analysis
 %--------------------------------------------------------------------------
 
-H_BagTreeAvg = nanmean(accuracy(1,1:17));
-G_BagTreeAvg = nanmean(accuracy(2,:));
+H_BagTreeAvg = nanmean(accuracy(1,1:n(1)));
+G_BagTreeAvg = nanmean(accuracy(2,1:n(2)));
 
 BT_Avg = mean([H_BagTreeAvg G_BagTreeAvg]);
 

@@ -1,4 +1,5 @@
 close all
+clear all
 
 Sub{1}=([1:14 19 24 29]).'; % Hamstring index
 Sub{2}=([1:21 23:30]).';
@@ -11,6 +12,7 @@ f=[]; lab=[];
 
 for n = 1:length(location)
     
+filenames=[];
 subject=num2str(Sub{n});
 if size(subject,2)==1
     subject=[repmat(' ',[length(subject) 1]) subject];
@@ -87,8 +89,8 @@ for x = 1:size(subject,1)
 end
 end
 
-%save('PatientData.mat', 'PatientData')
-save('FullPatientData.mat', 'PatientData')
+% save('PatientData.mat', 'PatientData')
+% save('FullPatientData.mat', 'PatientData')
 %end
 
 %% PCA
