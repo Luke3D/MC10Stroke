@@ -28,7 +28,7 @@ else
     else
         for i = 1:length(missing)
             switch missing{i}
-                case 'IA'
+                case 'SA'
                     c1(1,:) = zeros(1,n);
                     c1(2:n+1,:) = c;
                     
@@ -37,7 +37,7 @@ else
                     
                     C = c2;
                     
-                case 'SA'
+                case 'HA'
                     c1(1,:) = c(1,:);
                     c1(2,:) = zeros(1,n);
                     c1(3:n+1,:) = c(2:end,:);
@@ -48,7 +48,7 @@ else
                     
                     C = c2;
                     
-                case 'HA'
+                case 'IA'
                     c1(1:2,:) = c(1:2,:);
                     c1(3,:) = zeros(1,n);
                     c1(4:n+1,:) = c(3:end,:);
