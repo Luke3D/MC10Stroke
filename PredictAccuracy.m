@@ -1,9 +1,11 @@
 %load('PatientData.mat')
-% clear all
+clear all
 
-RUS=1;
+RUS=0;
+resamp_test=0;
+resamp_train=0;
 
-% load('FullPatientData.mat')
+load('FullPatientData.mat')
 
 N = {'h' 'g'};
 n = [17, 29];
@@ -84,8 +86,10 @@ for ii = 1:2
             IA=find(cellfun(@(x) strcmp(x,'IA'), testLabels));
 
             % sort data (use if not resampling test set
-            testData=testData([SA; HA; IA],:);
-            testLabels=testLabels([SA; HA; IA],:);
+            if ~resamp_test
+                testData=testData([SA; HA; IA],:);
+                testLabels=testLabels([SA; HA; IA],:);
+            end
             
             SA_count=length(SA);
             HA_count=length(HA);
@@ -98,44 +102,47 @@ for ii = 1:2
                 continue
             end
             
-%             if IA_count>0
-%                 resamp_count=min([SA_count HA_count IA_count]);
-%                 IA_inds=randperm(IA_count,resamp_count);
-%             else
-%                 resamp_count=min([SA_count HA_count]);
-%                 IA_inds=[];
-%             end
-% 
-%             SA_inds=randperm(SA_count,resamp_count);
-%             HA_inds=randperm(HA_count,resamp_count);  
-% 
-%             testData=testData([SA(SA_inds); HA(HA_inds); IA(IA_inds)],:);
-%             testLabels=testLabels([SA(SA_inds); HA(HA_inds); IA(IA_inds)]);
+            if resamp_test
+                if IA_count>0
+                    resamp_count=min([SA_count HA_count IA_count]);
+                    IA_inds=randperm(IA_count,resamp_count);
+                else
+                    resamp_count=min([SA_count HA_count]);
+                    IA_inds=[];
+                end
 
-            % training data
+                SA_inds=randperm(SA_count,resamp_count);
+                HA_inds=randperm(HA_count,resamp_count);  
+
+                testData=testData([SA(SA_inds); HA(HA_inds); IA(IA_inds)],:);
+                testLabels=testLabels([SA(SA_inds); HA(HA_inds); IA(IA_inds)]);
+            end
             
-%             SA=find(cellfun(@(x) strcmp(x,'SA'), trainingLabels));
-%             HA=find(cellfun(@(x) strcmp(x,'HA'), trainingLabels));
-%             IA=find(cellfun(@(x) strcmp(x,'IA'), trainingLabels));
-% 
-%             SA_count=length(SA);
-%             HA_count=length(HA);
-%             IA_count=length(IA);
-% 
-%             if IA_count>0
-%                 resamp_count=min([SA_count HA_count IA_count]);
-%                 IA_inds=randperm(IA_count,resamp_count);
-%             else
-%                 resamp_count=min([SA_count HA_count]);
-%                 IA_inds=[];
-%             end
-% 
-%             SA_inds=randperm(SA_count,resamp_count);
-%             HA_inds=randperm(HA_count,min(resamp_count*3,HA_count));  
-%         
-%             trainingData=trainingData([SA(SA_inds); HA(HA_inds); IA(IA_inds)],:);
-%             trainingLabels=trainingLabels([SA(SA_inds); HA(HA_inds); IA(IA_inds)]);
-     
+            % training data
+            if resamp_train
+                SA=find(cellfun(@(x) strcmp(x,'SA'), trainingLabels));
+                HA=find(cellfun(@(x) strcmp(x,'HA'), trainingLabels));
+                IA=find(cellfun(@(x) strcmp(x,'IA'), trainingLabels));
+
+                SA_count=length(SA);
+                HA_count=length(HA);
+                IA_count=length(IA);
+
+                if IA_count>0
+                    resamp_count=min([SA_count HA_count IA_count]);
+                    IA_inds=randperm(IA_count,resamp_count);
+                else
+                    resamp_count=min([SA_count HA_count]);
+                    IA_inds=[];
+                end
+
+                SA_inds=randperm(SA_count,resamp_count);
+                HA_inds=randperm(HA_count,min(resamp_count*3,HA_count));  
+
+                trainingData=trainingData([SA(SA_inds); HA(HA_inds); IA(IA_inds)],:);
+                trainingLabels=trainingLabels([SA(SA_inds); HA(HA_inds); IA(IA_inds)]);
+            end
+
         if RUS
             t = templateTree('MinLeafSize',5);
             Model = fitensemble(trainingData, trainingLabels, 'RUSBoost', 1000,t,'LearnRate',.1);
