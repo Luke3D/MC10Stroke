@@ -1,7 +1,7 @@
 function RealConfMat = checkLab(x, ConfMat, num)
 
 RealConfMat = [];
-Labels = {'IA' 'SA' 'HA'};
+Labels = {'HA' 'SA' 'IA'};
 c1 = []; c2 = [];
 present = zeros(1,3);
 N = length(ConfMat);
@@ -19,6 +19,9 @@ if N == num
 elseif N ~= num && sum(present) == 3
     RealConfMat = [ConfMat [0;0]; 0 0 0];
     return
+elseif isempty(ConfMat)
+    RealConfMat = zeros(num);
+    return
 else
     n = length(c);
     
@@ -29,33 +32,65 @@ else
         for i = 1:length(missing)
             switch missing{i}
                 case 'SA'
-                    c1(1,:) = zeros(1,n);
-                    c1(2:n+1,:) = c;
-                    
-                    c2(:,1) = zeros(n+1,1);
-                    c2(:,2:n+1) = c1(:,:);
-                    
-                    C = c2;
+                    if num == 1
+                        c1 = zeros(2);
+                        c1(2,2) = c;
+                        
+                        C = c1;
+                    elseif num == 2
+                        c1(1,:) = zeros(1,2);
+                        c1(2:3,:) = c(:,:);
+                        
+                        c2(:,1) = zeros(3,1);
+                        c2(:,2:3) = c1(:,:);
+                        
+                        C = c2;
+                    end
+%                     c1(1,:) = zeros(1,n);
+%                     c1(2:n+1,:) = c;
+%                     
+%                     c2(:,1) = zeros(n+1,1);
+%                     c2(:,2:n+1) = c1(:,:);
+%                     
+%                     C = c2;
                     
                 case 'HA'
-                    c1(1,:) = c(1,:);
-                    c1(2,:) = zeros(1,n);
-                    c1(3:n+1,:) = c(2:end,:);
-                    
-                    c2(:,1) = c1(:,1);
-                    c2(:,2) = zeros(1,n+1);
-                    c2(:,3:n+1) = c1(:,2:end);
-                    
-                    C = c2;
+                    if num == 1
+                        c1 = zeros(2);
+                        c1(1,1) = c;
+                        
+                        C = c1;
+                        
+                    elseif num == 2
+                        c1 = zeros(3);
+                        c1(1,1) = c(1,1);
+                        c1(1,3) = c(1,2);
+                        c1(3,1) = c(2,1);
+                        c1(3,3) = c(2,2);
+                        
+                        C = c1;
+                    end
+%                         
+%                     c1(1,:) = c(1,:);
+%                     c1(2,:) = zeros(1,n);
+%                     c1(3:n+1,:) = c(2:end,:);
+%                     
+%                     c2(:,1) = c1(:,1);
+%                     c2(:,2) = zeros(1,n+1);
+%                     c2(:,3:n+1) = c1(:,2:end);
+%                     
+%                     C = c2;
                     
                 case 'IA'
-                    c1(1:2,:) = c(1:2,:);
-                    c1(3,:) = zeros(1,n);
-                    c1(4:n+1,:) = c(3:end,:);
+                    c1(:,:) = c(:,:);
+                    c1(3,:) = zeros(1,2);
+                    %c1(n+1,:) = zeros(1,n+1);
+                    %c1(4:n+1,:) = c(3:end,:);
 
-                    c2(:,1:2) = c1(:,1:2);
-                    c2(:,3) = zeros(n+1,1);
-                    c2(:,4:n+1) = c1(:,3:end);
+                    c2(:,:) = c1(:,:);
+                    c2(:,3) = zeros(3,1);
+                    %c2(:,n+1) = zeros(n+1,1);
+                    %c2(:,4:n+1) = c1(:,3:end);
 
                     C = c2;
             end
