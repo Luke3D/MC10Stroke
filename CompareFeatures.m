@@ -14,9 +14,9 @@ for i = 1:length(Sub)
     good = []; bad = [];
     
     for j = 1:Sub(i)
-        if accuracy(i,j) < 0.6
+        if (balacc(i,j) < 0.7) && ~isnan(balacc(i,j))
             bad = [bad j];
-        else
+        elseif (balacc(i,j) >= 0.7) && ~isnan(balacc(i,j))
             good = [good j];
         end
     end
@@ -52,7 +52,9 @@ for i = 1:length(Sub)
     else
         Ash.good{i} = PFval(good);
         Ash.bad{i} = PFval(bad);
-    end    
+    end
+    Subjects{i} = [good bad];
+    good = []; bad = [];
 end
 
 
@@ -94,29 +96,31 @@ ylabel('Z-Score')
 
 % Plots Ashworth Score Relationship, needs variables and values from
 % DataProcessing.m
-group1 = [repmat('hg', size(Ash.good{1},2), 1); repmat('hb', size(Ash.bad{1},2),1)];
-group2 = [repmat('gg', size(Ash.good{2},2), 1); repmat('gb', size(Ash.bad{2},2),1)];
+% group1 = [repmat('hg', size(Ash.good{1},2), 1); repmat('hb', size(Ash.bad{1},2),1)];
+% group2 = [repmat('gg', size(Ash.good{2},2), 1); repmat('gb', size(Ash.bad{2},2),1)];
 
 figure
-boxplot([Ash.good{1} Ash.bad{1}]', group1)
+h1 = histogram(Ash.good{1}, length(Ash.good{1}), 'BinWidth', 0.25);
+hold on;
+h2 = histogram(Ash.bad{1}, length(Ash.bad{1}), 'BinWidth', 0.25);
 ax = gca;
-ax.YTick = [0 1 1.5 2 3];
-ax.YTickLabel = {'0', '1', '1+', '2', '3'};
-ax.XTick = [1 2];
-ax.XTickLabel = {'Good Data', 'Bad Data'};
-legend(ax,'off')
-title('Hamstring Accuracy')
-xlabel('Classification Ability')
-ylabel('Ashworth Score')
+ax.XTick = [0 1 1.5 2 3];
+ax.XTickLabel = {'0', '1', '1+', '2', '3'};
+legend('Good Data', 'Bad Data')
+title('Hamstring Ashworth Score Distributions')
+xlabel('Ashworth Score')
+ylabel('Number of Subjects')
+hold off;
 
 figure
-boxplot([Ash.good{2} Ash.bad{2}]', group2)
+h3 = histogram(Ash.good{2}, length(Ash.good{2}), 'BinWidth', 0.25);
+hold on;
+h4 = histogram(Ash.bad{2}, length(Ash.bad{2}), 'BinWidth', 0.25);
 ax = gca;
-ax.YTick = [0 1 1.5 2 3];
-ax.YTickLabel = {'0', '1', '1+', '2', '3'};
-ax.XTick = [1 2];
-ax.XTickLabel = {'Good Data', 'Bad Data'};
-legend(ax,'off')
-title('Gastrocnemius Accuracy')
-xlabel('Classification Ability')
-ylabel('Ashworth Score')
+ax.XTick = [0 1 1.5 2 3];
+ax.XTickLabel = {'0', '1', '1+', '2', '3'};
+legend('Good Data', 'Bad Data')
+title('Gastrocnemius Ashworth Score Distributions')
+xlabel('Ashworth Score')
+ylabel('Number of Subjects')
+hold off;
