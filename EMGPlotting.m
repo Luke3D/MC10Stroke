@@ -5,7 +5,7 @@ location = {'Gastrocnemius' 'Hamstring'};
 dirname = 'Z:\Stroke MC10\LabeledData\CS0';
 
 subject{1}=([1:21 23:30])'; % Gastrocnemius index
-subject{2}=([1:15])'; % Hamstring index
+subject{2}=([1:17])'; % Hamstring index
 
 %--------------------------------------------------------------------------
 % Data Extraction
