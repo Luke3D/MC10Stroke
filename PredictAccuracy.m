@@ -86,7 +86,7 @@ for ii = 1:2
         testLabels = PatientData.([N{ii} 'Label']){jj};
         
         if isempty(testData)
-            ConfMat{ii,jj}=[];
+            ConfMat{ii,jj}=zeros(num);
             accuracy(ii,jj)=NaN;
             continue
         end
@@ -109,7 +109,7 @@ for ii = 1:2
             IA_count=length(IA);
 
             if SA_count==0
-                ConfMat{ii,jj}=[];
+                ConfMat{ii,jj}=zeros(num);
                 accuracy(ii,jj)=NaN;
                 balacc(ii,jj)=NaN;
                 continue
@@ -167,6 +167,11 @@ for ii = 1:2
         LabelsRF = predict(Model, testData);
         
         ConfMat{ii,jj} = confusionmat(testLabels, LabelsRF);
+        
+        if isempty(ConfMat{ii,jj})
+            ConfMat{ii,jj} = zeros(num);
+        end
+        
         accuracy(ii,jj) = mean(strcmp(testLabels, LabelsRF));
         balacc(ii,jj) = mean(diag(ConfMat{ii,jj})./sum(ConfMat{ii,jj},2));
 
@@ -186,7 +191,7 @@ for ii = 1:2
          if ~isempty(ConfMat{ii,jj})
              RealConfMat{ii,jj} = checkLab(x, ConfMat{ii,jj}, num);
          else    
-             RealConfMat{ii,jj} = zeros(2);
+             RealConfMat{ii,jj} = zeros(num);
          end
          
          for kk = 1:numel(RealConfMat{ii,jj})
@@ -203,7 +208,7 @@ for ii = 1:2
      end
      
      TrueConf{ii} = tempMat;
-     tempMat = zeros(length(RealConfMat{ii,jj}));
+     tempMat = zeros(num);
      
 end
 
@@ -220,8 +225,8 @@ imagesc(TrueConf{1}); colorbar
 caxis([0 1])
 title('Hamstring Confusion Matrix')
 if inclInactive
-    set(gca,'XTick', [1 2 3]), set(gca, 'XTickLabels', {'Inactive', 'Spastic', 'Non-Spastic'})
-    set(gca,'YTick', [1 2 3]), set(gca, 'YTickLabels', {'Inactive', 'Spastic', 'Non-Spastic'})
+    set(gca,'XTick', [1 2 3]), set(gca, 'XTickLabels', {'Spastic', 'Non-Spastic', 'Inactive'})
+    set(gca,'YTick', [1 2 3]), set(gca, 'YTickLabels', {'Spastic', 'Non-Spastic', 'Inactive'})
 else
     set(gca,'XTick', [1 2]), set(gca, 'XTickLabels', {'Spastic', 'Non-Spastic'})
     set(gca,'YTick', [1 2]), set(gca, 'YTickLabels', {'Spastic', 'Non-Spastic'})
@@ -232,8 +237,8 @@ imagesc(TrueConf{2}); colorbar
 caxis([0 1])
 title('Gastrocnemius Confusion Matrix')
 if inclInactive
-    set(gca,'XTick', [1 2 3]), set(gca, 'XTickLabels', {'Inactive', 'Spastic', 'Non-Spastic'})
-    set(gca,'YTick', [1 2 3]), set(gca, 'YTickLabels', {'Inactive', 'Spastic', 'Non-Spastic'})
+    set(gca,'XTick', [1 2 3]), set(gca, 'XTickLabels', {'Spastic', 'Non-Spastic', 'Inactive'})
+    set(gca,'YTick', [1 2 3]), set(gca, 'YTickLabels', {'Spastic', 'Non-Spastic', 'Inactive'})
 else
     set(gca,'XTick', [1 2]), set(gca, 'XTickLabels', {'Spastic', 'Non-Spastic'})
     set(gca,'YTick', [1 2]), set(gca, 'YTickLabels', {'Spastic', 'Non-Spastic'})
@@ -252,6 +257,9 @@ title(['Gastrocnemius ' num2str(clipLength(2)) 's'])
 H_BagTreeAvg = nanmean(accuracy(1,1:n(1)));
 G_BagTreeAvg = nanmean(accuracy(2,1:n(2)));
 
+bal1 = 100*nanmean(balacc(1,1:n(1)));
+bal2 = 100*nanmean(balacc(2,1:n(2)));
+
 BT_Avg = mean([H_BagTreeAvg G_BagTreeAvg]);
 
 fprintf('Bagged Tree Accuracy [Hamstring]: %5.3f%%\n', 100*H_BagTreeAvg)
@@ -260,3 +268,6 @@ fprintf('Bagged Tree Accuracy [Gastrocnemius]: %5.3f%%\n', 100*G_BagTreeAvg)
 fprintf('------------------------------------------------------------\n')
 
 fprintf('Bagged Tree Model Accuracy: %5.3f%%\n', 100*BT_Avg)
+fprintf('Balanced Accuracy [Hamstring]: %5.3f%%\n', bal1)
+fprintf('Balanced Accuracy [Gastrocnemius]: %5.3f%%\n', bal2)
+fprintf('Balanced Accuracy Overall: %5.3f%%\n', nanmean([bal1 bal2]))

@@ -38,8 +38,8 @@ x1 = 1:17;
 gastro_bt = 100*accuracy(2,:);
 x2 = 1:29;
 
-a1 = mean(hamstring_bt);
-a2 = mean(gastro_bt);
+a1 = nanmean(hamstring_bt);
+a2 = nanmean(gastro_bt);
 
 A = [a1 a2];
 
@@ -81,7 +81,7 @@ ash = [KEval PFval];
 acy = [100*accuracy(1,1:17) 100*accuracy(2,:)];
 labels = [KElab; PFlab];
 
-p = polyfit(ash, acy, 2);
+p = polyfit(ash(~isnan(acy)), acy(~isnan(acy)), 2);
 f = polyval(p, ash);
 t = 0:3/41:3;
 ft = polyval(p, t);
