@@ -8,7 +8,7 @@ clear all
 
 filenames=rdir('Z:\Stroke MC10\LabeledData\**\*.csv');
 
-clipLength=[.75 .75]; % Ham/Gas
+clipLength=[.5 .5]; % Ham/Gas
 Fs=250;
 clipOverlap=[.9 .9]; % Ham/Gas
 

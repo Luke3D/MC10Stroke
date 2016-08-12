@@ -1,7 +1,7 @@
 %load('PatientData.mat')
-clear all
+clearvars -except clipLength
 
-RUS=0;
+RUS=1;
 resamp_test=0;
 resamp_train=0;
 
@@ -12,6 +12,8 @@ n = [17, 29];
 nTrees = 50;
 index = [];
 
+load('Good_inds.mat')
+useinds={H_good, G_good};
 inclInactive = 0;
 
 if ~inclInactive
@@ -28,6 +30,17 @@ testLabels = [];
 
 tempData = [];
 tempLabels = [];
+
+if ~isempty(useinds)
+    for i=1:2
+        for j=1:length(PatientData.(N{i}))
+            if ~any(j==useinds{i})
+                PatientData.([N{i}]){j}=[];
+                PatientData.([N{i} 'Label']){j}=[];
+            end
+        end
+    end
+end
 
 if ~inclInactive
     for ii = 1:2
@@ -225,6 +238,12 @@ else
     set(gca,'XTick', [1 2]), set(gca, 'XTickLabels', {'Spastic', 'Non-Spastic'})
     set(gca,'YTick', [1 2]), set(gca, 'YTickLabels', {'Spastic', 'Non-Spastic'})
 end
+
+figure; hist(balacc(1,1:n(1)),10);
+title(['Hamstring ' num2str(clipLength(1)) 's'])
+figure; hist(balacc(2,1:n(2)),10);
+title(['Gastrocnemius ' num2str(clipLength(2)) 's'])
+
 
 %--------------------------------------------------------------------------
 % Prints initial results of data analysis
