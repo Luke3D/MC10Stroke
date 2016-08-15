@@ -11,6 +11,9 @@ load('AshworthScores.mat')
 
 KElab = []; PFlab = [];
 KEval = []; PFval = [];
+ASHindexSA = []; ASHindexHA = [];
+
+labASH = [];
 
 for ii = [1:14 19 24 29]
         if strcmp(Ashworth{ii}.KE, '1+')
@@ -31,6 +34,28 @@ for jj = [1:21 23:30]
         PFval = [PFval Ashworth{jj}.PF];
     end
 end
+
+for i = 1:length(KElab)
+    if strcmp(KElab(i,:), '00')
+        labASH(i,1) = 0;
+        ASHindexHA = [ASHindexHA [1;i]];
+    else
+        labASH(i,1) = 1;
+        ASHindexSA = [ASHindexSA [1;i]];
+    end
+end
+
+for i = 1:length(PFlab)
+    if strcmp(PFlab(i,:), '00')
+        labASH(i,2) = 0;
+        ASHindexHA = [ASHindexHA [2;i]];
+    else
+        labASH(i,2) = 1;
+        ASHindexSA = [ASHindexSA [2;i]];
+    end
+end
+
+        
 
 hamstring_bt = 100*accuracy(1,1:17);
 x1 = 1:17;
