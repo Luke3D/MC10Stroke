@@ -1,7 +1,7 @@
 %load('PatientData.mat')
 clearvars -except clipLength
 
-RUS=1;
+RUS=0;
 resamp_test=0;
 resamp_train=0;
 
@@ -40,6 +40,7 @@ if ~isempty(useinds)
             end
         end
     end
+    n=cellfun(@(x) max(x),useinds);
 end
 
 if ~inclInactive
@@ -88,6 +89,7 @@ for ii = 1:2
         if isempty(testData)
             ConfMat{ii,jj}=zeros(num);
             accuracy(ii,jj)=NaN;
+            balacc(ii,jj)=NaN;
             continue
         end
         
