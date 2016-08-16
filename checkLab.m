@@ -1,9 +1,13 @@
 function RealConfMat = checkLab(x, ConfMat, num)
 
 RealConfMat = [];
-Labels = {'HA' 'SA' 'IA'};
+if num==3
+    Labels = {'HA' 'SA' 'IA'};
+elseif num==2
+    Labels = {'HA' 'SA'};
+end
 c1 = []; c2 = [];
-present = zeros(1,3);
+present = zeros(1,num);
 N = length(ConfMat);
 c = ConfMat;
 
@@ -32,12 +36,12 @@ else
         for i = 1:length(missing)
             switch missing{i}
                 case 'SA'
-                    if num == 1
+                    if num == 2
                         c1 = zeros(2);
-                        c1(2,2) = c;
+                        c1(1,1) = c;
                         
                         C = c1;
-                    elseif num == 2
+                    elseif num == 3
                         c1(1,:) = zeros(1,2);
                         c1(2:3,:) = c(:,:);
                         
@@ -55,13 +59,13 @@ else
 %                     C = c2;
                     
                 case 'HA'
-                    if num == 1
+                    if num == 2
                         c1 = zeros(2);
-                        c1(1,1) = c;
+                        c1(2,2) = c;
                         
                         C = c1;
                         
-                    elseif num == 2
+                    elseif num == 3
                         c1 = zeros(3);
                         c1(1,1) = c(1,1);
                         c1(1,3) = c(1,2);

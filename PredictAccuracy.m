@@ -1,7 +1,7 @@
 %load('PatientData.mat')
 clearvars -except clipLength
 
-RUS=0;
+RUS=1;
 resamp_test=0;
 resamp_train=0;
 
@@ -13,7 +13,8 @@ nTrees = 50;
 index = [];
 
 load('Good_inds.mat')
-useinds={H_good, G_good};
+% useinds={H_good, G_good};
+useinds={};
 inclInactive = 0;
 
 if ~inclInactive
@@ -66,6 +67,9 @@ if ~inclInactive
 end
     
 for ii = 1:2
+    
+    tempMat = zeros(num);
+    
      for jj = 1:n(ii)
          
         tempData = PatientData.([N{ii}]);
@@ -87,7 +91,7 @@ for ii = 1:2
         testLabels = PatientData.([N{ii} 'Label']){jj};
         
         if isempty(testData)
-            ConfMat{ii,jj}=zeros(num);
+            ConfMat{ii,jj}=[];
             accuracy(ii,jj)=NaN;
             balacc(ii,jj)=NaN;
             continue
@@ -170,12 +174,28 @@ for ii = 1:2
         
         ConfMat{ii,jj} = confusionmat(testLabels, LabelsRF);
         
-        if isempty(ConfMat{ii,jj})
-            ConfMat{ii,jj} = zeros(num);
-        end
+%         if isempty(ConfMat{ii,jj})
+%             ConfMat{ii,jj} = zeros(num);
+%         end
         
         accuracy(ii,jj) = mean(strcmp(testLabels, LabelsRF));
         balacc(ii,jj) = mean(diag(ConfMat{ii,jj})./sum(ConfMat{ii,jj},2));
+        
+        x = unique([testLabels LabelsRF]);
+
+        if ~isempty(ConfMat{ii,jj})
+            RealConfMat{ii,jj} = checkLab(x, ConfMat{ii,jj}, num);
+        else    
+            RealConfMat{ii,jj} = zeros(num);
+        end
+
+        tempMat = tempMat + RealConfMat{ii,jj};
+        
+        for kk = 1:numel(RealConfMat{ii,jj})
+            if isnan(RealConfMat{ii,jj}(kk))
+                RealConfMat{ii,jj}(kk) = 0;
+            end
+        end
 
         trainingData = [];
         trainingLabels = [];
@@ -185,29 +205,30 @@ for ii = 1:2
         
         tempData = [];
         tempLabels = [];
+        
      end
      
-     for jj = 1:n(ii)
-         x = unique(LabelsRF);
-         
-         if ~isempty(ConfMat{ii,jj})
-             RealConfMat{ii,jj} = checkLab(x, ConfMat{ii,jj}, num);
-         else    
-             RealConfMat{ii,jj} = zeros(num);
-         end
-         
-         for kk = 1:numel(RealConfMat{ii,jj})
-             if isnan(RealConfMat{ii,jj}(kk))
-                 RealConfMat{ii,jj}(kk) = 0;
-             end
-         end
-     end
+%      for jj = 1:n(ii)
+%          x = unique(LabelsRF);
+%          
+%          if ~isempty(ConfMat{ii,jj})
+%              RealConfMat{ii,jj} = checkLab(x, ConfMat{ii,jj}, num);
+%          else    
+%              RealConfMat{ii,jj} = zeros(num);
+%          end
+%          
+%          for kk = 1:numel(RealConfMat{ii,jj})
+%              if isnan(RealConfMat{ii,jj}(kk))
+%                  RealConfMat{ii,jj}(kk) = 0;
+%              end
+%          end
+%      end
      
-     tempMat = zeros(length(RealConfMat{ii,jj}));
-     
-     for jj = 1:n(ii)
-         tempMat = tempMat + RealConfMat{ii,jj};
-     end
+%      tempMat = zeros(length(RealConfMat{ii,jj}));
+%      
+%      for jj = 1:n(ii)
+%          
+%      end
      
      TrueConf{ii} = tempMat;
      tempMat = zeros(num);

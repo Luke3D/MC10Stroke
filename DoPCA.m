@@ -1,5 +1,4 @@
-close all
-clear all
+clearvars -except clipLength
 
 Sub{1}=([1:14 19 24 29]).'; % Hamstring index
 Sub{2}=([1:21 23:30]).';
