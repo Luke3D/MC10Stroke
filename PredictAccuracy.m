@@ -1,4 +1,5 @@
 %load('PatientData.mat')
+close all
 clearvars -except clipLength
 
 RUS=1;
@@ -10,7 +11,7 @@ load('FullPatientData.mat')
 N = {'h' 'g'};
 n = [17, 29];
 nTrees = 50;
-index = [];
+SAindex = [];
 
 load('Good_inds.mat')
 % useinds={H_good, G_good};
@@ -172,6 +173,10 @@ for ii = 1:2
 %         [LabelsRF, P1, RF1] = predict(Model, testData);
         LabelsRF = predict(Model, testData);
         
+        if sum(strcmp(LabelsRF, 'SA')) >= 1
+            SAindex = [SAindex [ii;jj]];
+        end
+        
         ConfMat{ii,jj} = confusionmat(testLabels, LabelsRF);
         
 %         if isempty(ConfMat{ii,jj})
@@ -267,9 +272,9 @@ else
     set(gca,'YTick', [1 2]), set(gca, 'YTickLabels', {'Spastic', 'Non-Spastic'})
 end
 
-figure; hist(balacc(1,1:n(1)),10);
+figure; histogram(balacc(1,1:n(1)),10);
 title(['Hamstring ' num2str(clipLength(1)) 's'])
-figure; hist(balacc(2,1:n(2)),10);
+figure; histogram(balacc(2,:),10);
 title(['Gastrocnemius ' num2str(clipLength(2)) 's'])
 
 
@@ -281,7 +286,7 @@ H_BagTreeAvg = nanmean(accuracy(1,1:n(1)));
 G_BagTreeAvg = nanmean(accuracy(2,1:n(2)));
 
 bal1 = 100*nanmean(balacc(1,1:n(1)));
-bal2 = 100*nanmean(balacc(2,1:n(2)));
+bal2 = 100*nanmean(balacc(2,:));
 
 BT_Avg = mean([H_BagTreeAvg G_BagTreeAvg]);
 
