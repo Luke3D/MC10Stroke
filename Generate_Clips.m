@@ -8,13 +8,19 @@ clear all
 
 filenames=rdir('Z:\Stroke MC10\LabeledData\**\*.csv');
 
-clipLength=[.5 .5]; % Ham/Gas
+normalize=1;
+extradir=[];
+if normalize
+    extradir='Normalized\';
+end
+
+clipLength=[2 .5]; % Ham/Gas
 Fs=250;
 clipOverlap=[.9 .9]; % Ham/Gas
 
 for indF=1:length(filenames)
     Data=readtable(filenames(indF).name,'ReadVariableNames',false);
-    [savepath,filename,~]=fileparts(['Z:\Stroke MC10\Clips\' filenames(indF).name(31:end)]);
+    [savepath,filename,~]=fileparts(['Z:\Stroke MC10\Clips\' extradir filenames(indF).name(31:end)]);
     if ~exist(savepath,'dir')
         mkdir(savepath)
     end
@@ -70,13 +76,16 @@ for indF=1:length(filenames)
         else
             Label{indClip-skips}='IA';
         end
-        
-        EMG_all{indClip-skips}=EMG(indStart:indEnd,:);
+        newData=EMG(indStart:indEnd,:);
+        if normalize
+            newData=(newData-mean(newData))/std(newData);
+        end
+        EMG_all{indClip-skips}=newData;
         
 %         Features{indClip}=[getFeatures(ACC(indStart:indEnd,:).') getEMGFeatures(EMG(indStart:indEnd,:).',std(EMG)*.2) getEMGFeatures(EMG_env(indStart:indEnd).',std(EMG)*.2)];
         %combine raw emg features and emg envelope features
 %         Features{indClip-skips}=[getEMGFeatures_New(EMG(indStart:indEnd,:).',std(EMG)*.2) getEMGFeatures_New(EMG_env(indStart:indEnd).',std(EMG)*.2)];
-        Features{indClip-skips}= getEMGFeatures(EMG(indStart:indEnd,:).');
+        Features{indClip-skips}= getEMGFeatures(newData');
 
     end
     Label(cellfun(@isempty,Label)==1)=[];
