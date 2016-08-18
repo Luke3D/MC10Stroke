@@ -1,12 +1,12 @@
 %load('PatientData.mat')
-close all
+% close all
 clearvars -except clipLength
 
 RUS=1;
 resamp_test=0;
 resamp_train=0;
 
-load('FullPatientData.mat')
+load('FullPatientData_Norm.mat')
 
 N = {'h' 'g'};
 n = [17, 29];
