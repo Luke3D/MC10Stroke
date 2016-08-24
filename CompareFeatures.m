@@ -22,13 +22,23 @@ for i = 1:length(Sub)
     end
     
     tempData_good = []; tempData_bad = []; u = []; s = [];
+    tempHa_good = []; tempHa_bad = [];
     
+    % assemble good and bad data for SA and HA conditions
     for j = good;
-        tempData_good = [tempData_good; PatientData.([Name{i}]){j}];
+        SA_inds=find(strcmp(PatientData.([Name{i} 'Label']){j},'SA'));
+        tempData_good = [tempData_good; PatientData.([Name{i}]){j}(SA_inds,:)];
+        
+        HA_inds=find(strcmp(PatientData.([Name{i} 'Label']){j},'HA'));
+        tempHa_good = [tempHa_good; PatientData.([Name{i}]){j}(HA_inds,:)];
     end
     
     for j = bad;
-        tempData_bad = [tempData_bad; PatientData.([Name{i}]){j}];
+        SA_inds=find(strcmp(PatientData.([Name{i} 'Label']){j},'SA'));
+        tempData_bad = [tempData_bad; PatientData.([Name{i}]){j}(SA_inds,:)];
+        
+        HA_inds=find(strcmp(PatientData.([Name{i} 'Label']){j},'HA'));
+        tempHa_bad = [tempHa_bad; PatientData.([Name{i}]){j}(HA_inds,:)];
     end
     
     uTemp = mean([tempData_good; tempData_bad]);
@@ -46,47 +56,98 @@ for i = 1:length(Sub)
     
     Data.bad{i} = (tempData_bad - u) ./ s;
     
-    if i == 1
-        Ash.good{i} = KEval(good);
-        Ash.bad{i} = KEval(bad);
-    else
-        Ash.good{i} = PFval(good);
-        Ash.bad{i} = PFval(bad);
-    end
+    uTemp = mean([tempHa_good; tempHa_bad]);
+    sTemp = std([tempHa_good; tempHa_bad]);
+    
+    u = repmat(uTemp, size(tempHa_good,1), 1);
+    s = repmat(sTemp, size(tempHa_good,1), 1);
+    
+    Data.HAgood{i} = (tempHa_good - u) ./ s;
+    
+    u = []; s = [];
+    
+    u = repmat(uTemp, size(tempHa_bad,1), 1);
+    s = repmat(sTemp, size(tempHa_bad,1), 1);
+    
+    Data.HAbad{i} = (tempHa_bad - u) ./ s;
+    
+    
+%     if i == 1
+%         Ash.good{i} = KEval(good);
+%         Ash.bad{i} = KEval(bad);
+%     else
+%         Ash.good{i} = PFval(good);
+%         Ash.bad{i} = PFval(bad);
+%     end
     Subjects{i} = [good bad];
     good = []; bad = [];
 end
 
 
 % Plots features comparisons
-figure
-subplot(2,1,1)
-h = boxplot(Data.good{1});
+figure; hold on
+% subplot(2,1,1)
+h = boxplot(Data.good{1},'colors','b');
 set(h(7,:),'Visible','off')
 ylim([-5 5])
 title('Good Hamstring Data')
 xlabel('Features')
 ylabel('Z-Score')
 
-subplot(2,1,2)
-h = boxplot(Data.bad{1});
+% subplot(2,1,2)
+h = boxplot(Data.bad{1},'colors','r');
 set(h(7,:),'Visible','off')
 ylim([-5 5])
 title('Bad Hamstring Data')
 xlabel('Features')
 ylabel('Z-Score')
 
-figure
-subplot(2,1,1)
-h = boxplot(Data.good{2});
+figure; hold on
+% subplot(2,1,1)
+h = boxplot(Data.good{2},'colors','b');
 set(h(7,:),'Visible','off')
 ylim([-5 5])
 title('Good Gastrocnemius Data')
 xlabel('Features')
 ylabel('Z-Score')
 
-subplot(2,1,2)
-h = boxplot(Data.bad{2});
+% subplot(2,1,2)
+h = boxplot(Data.bad{2},'colors','r');
+set(h(7,:),'Visible','off')
+ylim([-5 5])
+title('Bad Gastrocnemius Data')
+xlabel('Features')
+ylabel('Z-Score')
+
+% Plots HA features comparisons
+figure; hold on
+% subplot(2,1,1)
+h = boxplot(Data.HAgood{1},'colors','b');
+set(h(7,:),'Visible','off')
+ylim([-5 5])
+title('Good Hamstring Data')
+xlabel('Features')
+ylabel('Z-Score')
+
+% subplot(2,1,2)
+h = boxplot(Data.HAbad{1},'colors','r');
+set(h(7,:),'Visible','off')
+ylim([-5 5])
+title('Bad Hamstring Data')
+xlabel('Features')
+ylabel('Z-Score')
+
+figure; hold on
+% subplot(2,1,1)
+h = boxplot(Data.HAgood{2},'colors','b');
+set(h(7,:),'Visible','off')
+ylim([-5 5])
+title('Good Gastrocnemius Data')
+xlabel('Features')
+ylabel('Z-Score')
+
+% subplot(2,1,2)
+h = boxplot(Data.HAbad{2},'colors','r');
 set(h(7,:),'Visible','off')
 ylim([-5 5])
 title('Bad Gastrocnemius Data')
