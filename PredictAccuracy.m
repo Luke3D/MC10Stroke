@@ -12,10 +12,11 @@ N = {'h' 'g'};
 n = [17, 29];
 nTrees = 50;
 SAindex = [];
+err=cell(2,1);
 
 load('Good_inds.mat')
-% useinds={H_good, G_good};
-useinds={};
+useinds={H_good, G_good};
+% useinds={};
 inclInactive = 0;
 
 if ~inclInactive
@@ -167,7 +168,11 @@ for ii = 1:2
             t = templateTree('MinLeafSize',5);
             Model = fitensemble(trainingData, trainingLabels, 'RUSBoost', 1000,t,'LearnRate',.1);
         else
-            Model = TreeBagger(nTrees, trainingData, trainingLabels);
+            Model = TreeBagger(nTrees, trainingData, trainingLabels, 'OOBVarImp', 'on');
+            if isempty(err{ii})
+                err{ii}=zeros(size(Model.OOBPermutedVarDeltaError));
+            end
+            err{ii} = err{ii}+Model.OOBPermutedVarDeltaError;
         end
         
 %         [LabelsRF, P1, RF1] = predict(Model, testData);
