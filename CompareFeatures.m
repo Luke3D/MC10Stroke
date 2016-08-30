@@ -72,13 +72,13 @@ for i = 1:length(Sub)
     Data.HAbad{i} = (tempHa_bad - u) ./ s;
     
     
-%     if i == 1
-%         Ash.good{i} = KEval(good);
-%         Ash.bad{i} = KEval(bad);
-%     else
-%         Ash.good{i} = PFval(good);
-%         Ash.bad{i} = PFval(bad);
-%     end
+    if i == 1
+        Ash.good{i} = KEval(good);
+        Ash.bad{i} = KEval(bad);
+    else
+        Ash.good{i} = PFval(good);
+        Ash.bad{i} = PFval(bad);
+    end
     Subjects{i} = [good bad];
     good = []; bad = [];
 end
@@ -86,79 +86,51 @@ end
 
 % Plots features comparisons
 figure; hold on
-% subplot(2,1,1)
-h = boxplot(Data.good{1},'colors','b');
-set(h(7,:),'Visible','off')
+h1 = boxplot(Data.good{1},'colors','b');
+h2 = boxplot(Data.bad{1},'colors','r');
+hold off
+set(h1(7,:),'Visible','off')
+set(h2(7,:),'Visible','off')
 ylim([-5 5])
-title('Good Hamstring Data')
-xlabel('Features')
-ylabel('Z-Score')
-
-% subplot(2,1,2)
-h = boxplot(Data.bad{1},'colors','r');
-set(h(7,:),'Visible','off')
-ylim([-5 5])
-title('Bad Hamstring Data')
+title('Hamstring Data [Spastic]')
 xlabel('Features')
 ylabel('Z-Score')
 
 figure; hold on
-% subplot(2,1,1)
-h = boxplot(Data.good{2},'colors','b');
-set(h(7,:),'Visible','off')
+h1 = boxplot(Data.good{2},'colors','b');
+h2 = boxplot(Data.bad{2},'colors','r');
+hold off
+set(h1(7,:),'Visible','off')
+set(h2(7,:),'Visible','off')
 ylim([-5 5])
-title('Good Gastrocnemius Data')
-xlabel('Features')
-ylabel('Z-Score')
-
-% subplot(2,1,2)
-h = boxplot(Data.bad{2},'colors','r');
-set(h(7,:),'Visible','off')
-ylim([-5 5])
-title('Bad Gastrocnemius Data')
+title('Gastrocnemius Data [Spastic]')
 xlabel('Features')
 ylabel('Z-Score')
 
 % Plots HA features comparisons
 figure; hold on
-% subplot(2,1,1)
-h = boxplot(Data.HAgood{1},'colors','b');
-set(h(7,:),'Visible','off')
+h1 = boxplot(Data.HAgood{1},'colors','b');
+h2 = boxplot(Data.HAbad{1},'colors','r');
+hold off
+set(h1(7,:),'Visible','off')
+set(h2(7,:),'Visible','off')
 ylim([-5 5])
-title('Good Hamstring Data')
-xlabel('Features')
-ylabel('Z-Score')
-
-% subplot(2,1,2)
-h = boxplot(Data.HAbad{1},'colors','r');
-set(h(7,:),'Visible','off')
-ylim([-5 5])
-title('Bad Hamstring Data')
+title('Hamstring Data [Non-Spastic]')
 xlabel('Features')
 ylabel('Z-Score')
 
 figure; hold on
-% subplot(2,1,1)
-h = boxplot(Data.HAgood{2},'colors','b');
-set(h(7,:),'Visible','off')
+h1 = boxplot(Data.HAgood{2},'colors','b');
+h2 = boxplot(Data.HAbad{2},'colors','r');
+hold off
+set(h1(7,:),'Visible','off')
+set(h2(7,:),'Visible','off')
 ylim([-5 5])
-title('Good Gastrocnemius Data')
-xlabel('Features')
-ylabel('Z-Score')
-
-% subplot(2,1,2)
-h = boxplot(Data.HAbad{2},'colors','r');
-set(h(7,:),'Visible','off')
-ylim([-5 5])
-title('Bad Gastrocnemius Data')
+title('Gastrocnemius Data [Non-Spastic]')
 xlabel('Features')
 ylabel('Z-Score')
 
 
-% Plots Ashworth Score Relationship, needs variables and values from
-% DataProcessing.m
-% group1 = [repmat('hg', size(Ash.good{1},2), 1); repmat('hb', size(Ash.bad{1},2),1)];
-% group2 = [repmat('gg', size(Ash.good{2},2), 1); repmat('gb', size(Ash.bad{2},2),1)];
 
 figure
 h1 = histogram(Ash.good{1}, length(Ash.good{1}), 'BinWidth', 0.25);
