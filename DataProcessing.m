@@ -57,16 +57,13 @@ end
 
         
 
-hamstring_bt = 100*accuracy(1,1:17);
-x1 = 1:17;
+hamstring_bt = 100*balacc(~isnan(balacc(1,:)));
+x1 = 1:length(hamstring_bt);
 
-gastro_bt = 100*accuracy(2,:);
-x2 = 1:29;
+gastro_bt = 100*balacc(~isnan(balacc(2,:)));
+x2 = 1:length(gastro_bt);
 
-a1 = nanmean(hamstring_bt);
-a2 = nanmean(gastro_bt);
-
-A = [a1 a2];
+A = [bal1 bal2];
 
 M = [hamstring_bt gastro_bt]';
 m1 = repmat('H_BT',size(hamstring_bt,2),1);
@@ -83,7 +80,7 @@ text(1:2,A',num2str(A','%4.2f'),...
 'HorizontalAlignment','center', 'VerticalAlignment','middle')
 
 figure
-gscatter(KEval, 100*accuracy(1,1:17), KElab)
+gscatter(KEval, 100*balacc(1,1:17), KElab)
 ax = gca;
 ax.XTick = [0 1 1.5 2 3];
 ax.XTickLabel = {'0', '1', '1+', '2', '3'};
@@ -93,7 +90,7 @@ xlabel('Asworth Scores')
 ylabel('Model Accuracy [%]')
 
 figure
-gscatter(PFval, 100*accuracy(2,:), PFlab)
+gscatter(PFval, 100*balacc(2,:), PFlab)
 ax = gca;
 ax.XTick = [0 1 1.5 2 3];
 ax.XTickLabel = {'0', '1', '1+', '2', '3'};
@@ -145,5 +142,4 @@ for i = 1:2
     
     Precision(:,i) = tempPre;
     Recall(:,i) = tempRec;
-    
 end
