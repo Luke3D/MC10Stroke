@@ -4,9 +4,10 @@ clearvars -except clipLength
 
 RUS=1;
 resamp_test=0;
-resamp_train=0;
+resamp_train=1;
 
-load('FullPatientData_Norm.mat')
+%load('FullPatientData_Norm.mat')
+load('FullPatientData.mat')
 
 N = {'h' 'g'};
 n = [17, 29];
@@ -15,9 +16,9 @@ SAindex = [];
 err=cell(2,1);
 
 load('Good_inds.mat')
-useinds={H_good, G_good};
-% useinds={};
-inclInactive = 0;
+%useinds={H_good, G_good};
+useinds={};
+inclInactive = 1;
 
 if ~inclInactive
     num = 2;
@@ -69,8 +70,6 @@ if ~inclInactive
 end
     
 for ii = 1:2
-    
-    tempMat = zeros(num);
     
      for jj = 1:n(ii)
          
@@ -175,7 +174,6 @@ for ii = 1:2
             err{ii} = err{ii}+Model.OOBPermutedVarDeltaError;
         end
         
-%         [LabelsRF, P1, RF1] = predict(Model, testData);
         LabelsRF = predict(Model, testData);
         
         if sum(strcmp(LabelsRF, 'SA')) >= 1
@@ -184,11 +182,14 @@ for ii = 1:2
         
         ConfMat{ii,jj} = confusionmat(testLabels, LabelsRF);
         
-%         if isempty(ConfMat{ii,jj})
-%             ConfMat{ii,jj} = zeros(num);
-%         end
+        if isempty(ConfMat{ii,jj})
+            ConfMat{ii,jj} = zeros(num);
+        end
         
-        accuracy(ii,jj) = mean(strcmp(testLabels, LabelsRF));
+        accuracy(ii,jj) = mean(strcmp(testLabels, 'HA'));
+        % Redefined accuracy as accuracy compared to predicting all labels
+        % as HA
+        
         balacc(ii,jj) = mean(diag(ConfMat{ii,jj})./sum(ConfMat{ii,jj},2));
         
         x = unique([testLabels LabelsRF]);
@@ -198,8 +199,11 @@ for ii = 1:2
         else    
             RealConfMat{ii,jj} = zeros(num);
         end
-
-        tempMat = tempMat + RealConfMat{ii,jj};
+        
+        tempConf = RealConfMat{ii,jj};
+        correctones = sum(tempConf,2);
+        correctones = repmat(correctones,[1 num]);
+        RealConfMat{ii,jj} = tempConf ./ correctones;
         
         for kk = 1:numel(RealConfMat{ii,jj})
             if isnan(RealConfMat{ii,jj}(kk))
@@ -217,41 +221,31 @@ for ii = 1:2
         tempLabels = [];
         
      end
-     
-%      for jj = 1:n(ii)
-%          x = unique(LabelsRF);
-%          
-%          if ~isempty(ConfMat{ii,jj})
-%              RealConfMat{ii,jj} = checkLab(x, ConfMat{ii,jj}, num);
-%          else    
-%              RealConfMat{ii,jj} = zeros(num);
-%          end
-%          
-%          for kk = 1:numel(RealConfMat{ii,jj})
-%              if isnan(RealConfMat{ii,jj}(kk))
-%                  RealConfMat{ii,jj}(kk) = 0;
-%              end
-%          end
-%      end
-     
-%      tempMat = zeros(length(RealConfMat{ii,jj}));
-%      
-%      for jj = 1:n(ii)
-%          
-%      end
-     
-     TrueConf{ii} = tempMat;
-     tempMat = zeros(num);
-     
 end
 
 
+% for ii = 1:2
+%     tempConf = TrueConf{ii};
+%     correctones = sum(tempConf,2);
+%     correctones = repmat(correctones,[1 num]);
+%     TrueConf{ii} = tempConf ./ correctones;
+% end
+
+tempMat = zeros(num);
+n = [17 26];
+ind = [10 16];
 for ii = 1:2
-    tempConf = TrueConf{ii};
-    correctones = sum(tempConf,2);
-    correctones = repmat(correctones,[1 num]);
-    TrueConf{ii} = tempConf ./ correctones;
+    for jj = 1:n(ii)
+        if ~isempty(RealConfMat{ii,jj})
+            tempMat = tempMat + RealConfMat{ii,jj};
+        end
+    end
+    
+    TrueConf{ii} = tempMat ./ ind(ii);
+    
+    tempMat = zeros(num);
 end
+
 
 figure
 imagesc(TrueConf{1}); colorbar
@@ -263,6 +257,7 @@ if inclInactive
 else
     set(gca,'XTick', [1 2]), set(gca, 'XTickLabels', {'Spastic', 'Non-Spastic'})
     set(gca,'YTick', [1 2]), set(gca, 'YTickLabels', {'Spastic', 'Non-Spastic'})
+%    set(gca,'FontSize', 20)
 end
 
 figure
@@ -275,12 +270,19 @@ if inclInactive
 else
     set(gca,'XTick', [1 2]), set(gca, 'XTickLabels', {'Spastic', 'Non-Spastic'})
     set(gca,'YTick', [1 2]), set(gca, 'YTickLabels', {'Spastic', 'Non-Spastic'})
+%    set(gca,'FontSize', 20)
 end
 
 figure; histogram(balacc(1,1:n(1)),10);
-title(['Hamstring ' num2str(clipLength(1)) 's'])
+title('Hamstring Accuracy Distribution')
+xlabel('Accuracy')
+ylabel('Number of Subjects')
+%set(gca,'FontSize', 20)
 figure; histogram(balacc(2,:),10);
-title(['Gastrocnemius ' num2str(clipLength(2)) 's'])
+title('Gastrocnemius Accuracy Distribution')
+xlabel('Accuracy')
+ylabel('Number of Subjects')
+%set(gca,'FontSize', 20)
 
 
 %--------------------------------------------------------------------------
@@ -295,8 +297,8 @@ bal2 = 100*nanmean(balacc(2,:));
 
 BT_Avg = mean([H_BagTreeAvg G_BagTreeAvg]);
 
-fprintf('Bagged Tree Accuracy [Hamstring]: %5.3f%%\n', 100*H_BagTreeAvg)
-fprintf('Bagged Tree Accuracy [Gastrocnemius]: %5.3f%%\n', 100*G_BagTreeAvg)
+fprintf('All HA Accuracy [Hamstring]: %5.3f%%\n', 100*H_BagTreeAvg)
+fprintf('All HA Accuracy [Gastrocnemius]: %5.3f%%\n', 100*G_BagTreeAvg)
 
 fprintf('------------------------------------------------------------\n')
 
