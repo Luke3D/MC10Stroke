@@ -66,6 +66,12 @@ else
                         C = c1;
                         
                     elseif num == 3
+                        if length(c) == 1
+                            c1 = zeros(3);
+                            c1(1,1) = c(1,1);
+                            
+                            C = c1;
+                        else
                         c1 = zeros(3);
                         c1(1,1) = c(1,1);
                         c1(1,3) = c(1,2);
@@ -73,6 +79,7 @@ else
                         c1(3,3) = c(2,2);
                         
                         C = c1;
+                        end
                     end
 %                         
 %                     c1(1,:) = c(1,:);
