@@ -44,7 +44,7 @@ for ii = 1:length(n)
     end
 end
 
-[C1, order1] = confusionmat(labASH(1:17,1), labEMG(1:17,1));
+[C1, order1] = confusionmat(labEMG(1:17,1), labASH(1:17,1));
 correctones = sum(C1,2);
 correctones = repmat(correctones,[1 2]);
 C1 = C1 ./ correctones;
