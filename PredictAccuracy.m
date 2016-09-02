@@ -4,10 +4,10 @@ clearvars -except clipLength
 
 RUS=1;
 resamp_test=0;
-resamp_train=1;
+resamp_train=0;
 
-%load('FullPatientData_Norm.mat')
-load('FullPatientData.mat')
+load('FullPatientData_Norm.mat')
+%load('FullPatientData.mat')
 
 N = {'h' 'g'};
 n = [17, 29];
@@ -18,7 +18,7 @@ err=cell(2,1);
 load('Good_inds.mat')
 %useinds={H_good, G_good};
 useinds={};
-inclInactive = 1;
+inclInactive = 0;
 
 if ~inclInactive
     num = 2;
@@ -70,7 +70,7 @@ if ~inclInactive
 end
     
 for ii = 1:2
-    
+    ConfMat = [];
      for jj = 1:n(ii)
          
         tempData = PatientData.([N{ii}]);
@@ -180,7 +180,7 @@ for ii = 1:2
             SAindex = [SAindex [ii;jj]];
         end
         
-        ConfMat{ii,jj} = confusionmat(testLabels, LabelsRF);
+       ConfMat{ii,jj} = confusionmat(testLabels, LabelsRF);
         
         if isempty(ConfMat{ii,jj})
             ConfMat{ii,jj} = zeros(num);
@@ -190,26 +190,21 @@ for ii = 1:2
         % Redefined accuracy as accuracy compared to predicting all labels
         % as HA
         
-        balacc(ii,jj) = mean(diag(ConfMat{ii,jj})./sum(ConfMat{ii,jj},2));
+       balacc(ii,jj) = mean(diag(ConfMat{ii,jj})./sum(ConfMat{ii,jj},2));
         
         x = unique([testLabels LabelsRF]);
 
         if ~isempty(ConfMat{ii,jj})
-            RealConfMat{ii,jj} = checkLab(x, ConfMat{ii,jj}, num);
-        else    
-            RealConfMat{ii,jj} = zeros(num);
+            RealConfMat(:,:,ii,jj) = checkLab(x, ConfMat{ii,jj}, num);
+        else
+            RealConfMat(:,:,ii,jj) = zeros(num);
         end
+
+        tempConf = RealConfMat(:,:,ii,jj);
+        correctones = sum(tempConf, 2);
+        correctones = repmat(correctones, [1 num]);
+        RealConfMat(:,:,ii,jj) = tempConf ./ correctones;
         
-        tempConf = RealConfMat{ii,jj};
-        correctones = sum(tempConf,2);
-        correctones = repmat(correctones,[1 num]);
-        RealConfMat{ii,jj} = tempConf ./ correctones;
-        
-        for kk = 1:numel(RealConfMat{ii,jj})
-            if isnan(RealConfMat{ii,jj}(kk))
-                RealConfMat{ii,jj}(kk) = 0;
-            end
-        end
 
         trainingData = [];
         trainingLabels = [];
@@ -223,29 +218,23 @@ for ii = 1:2
      end
 end
 
+n1 = length(RealConfMat);
 
-% for ii = 1:2
-%     tempConf = TrueConf{ii};
-%     correctones = sum(tempConf,2);
-%     correctones = repmat(correctones,[1 num]);
-%     TrueConf{ii} = tempConf ./ correctones;
-% end
-
-tempMat = zeros(num);
-n = [17 26];
-ind = [10 16];
 for ii = 1:2
-    for jj = 1:n(ii)
-        if ~isempty(RealConfMat{ii,jj})
-            tempMat = tempMat + RealConfMat{ii,jj};
+    kk = 1;
+    tempMat = [];
+    for jj = 1:n1
+        temp = RealConfMat(:,:,ii,jj);
+        
+        if nansum(temp(:)) ~= 0
+            tempMat(:,:,kk) = temp;
+            kk = kk + 1;
         end
+        
     end
     
-    TrueConf{ii} = tempMat ./ ind(ii);
-    
-    tempMat = zeros(num);
+    TrueConf{ii} = nanmean(tempMat,3);
 end
-
 
 figure
 imagesc(TrueConf{1}); colorbar
