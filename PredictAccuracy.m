@@ -1,5 +1,5 @@
 %load('PatientData.mat')
-% close all
+close all
 clearvars -except clipLength
 
 RUS=1;
@@ -7,7 +7,7 @@ resamp_test=0;
 resamp_train=0;
 
 load('FullPatientData_Norm.mat')
-%load('FullPatientData.mat')
+% load('FullPatientData.mat')
 
 N = {'h' 'g'};
 n = [17, 29];
@@ -16,8 +16,15 @@ SAindex = [];
 err=cell(2,1);
 
 load('Good_inds.mat')
-%useinds={H_good, G_good};
-useinds={};
+% useinds={1:n(1), 1:n(2)};
+% useinds{1}(H_good)=[];
+% useinds{2}(G_good)=[];
+% useinds{1}(1:3)=[];
+% useinds{2}(1:2)=[];
+% useinds{1}=[useinds{1} H_good];
+% useinds{2}=[useinds{2} G_good([1 4 6:11])];
+useinds={H_good, G_good};
+% useinds={};
 inclInactive = 0;
 
 if ~inclInactive
@@ -70,7 +77,6 @@ if ~inclInactive
 end
     
 for ii = 1:2
-    ConfMat = [];
      for jj = 1:n(ii)
          
         tempData = PatientData.([N{ii}]);
@@ -165,7 +171,8 @@ for ii = 1:2
 
         if RUS
             t = templateTree('MinLeafSize',5);
-            Model = fitensemble(trainingData, trainingLabels, 'RUSBoost', 1000,t,'LearnRate',.1);
+            Model = fitensemble(trainingData, trainingLabels, 'RUSBoost', 200, t,'LearnRate',.1);
+%             figure; plot(loss(Model, testData, testLabels,'mode','cumulative'))
         else
             Model = TreeBagger(nTrees, trainingData, trainingLabels, 'OOBVarImp', 'on');
             if isempty(err{ii})
@@ -180,7 +187,7 @@ for ii = 1:2
             SAindex = [SAindex [ii;jj]];
         end
         
-       ConfMat{ii,jj} = confusionmat(testLabels, LabelsRF);
+        ConfMat{ii,jj} = confusionmat(testLabels, LabelsRF);
         
         if isempty(ConfMat{ii,jj})
             ConfMat{ii,jj} = zeros(num);
@@ -190,7 +197,7 @@ for ii = 1:2
         % Redefined accuracy as accuracy compared to predicting all labels
         % as HA
         
-       balacc(ii,jj) = mean(diag(ConfMat{ii,jj})./sum(ConfMat{ii,jj},2));
+        balacc(ii,jj) = mean(diag(ConfMat{ii,jj})./sum(ConfMat{ii,jj},2));
         
         x = unique([testLabels LabelsRF]);
 

@@ -91,7 +91,7 @@ end
 end
 
 % save('PatientData.mat', 'PatientData')
-save('FullPatientData.mat', 'PatientData')
+save('FullPatientData_HRvC.mat', 'PatientData')
 %end
 
 %% PCA

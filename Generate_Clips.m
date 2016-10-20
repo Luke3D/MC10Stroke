@@ -14,9 +14,9 @@ if normalize
     extradir='Normalized\';
 end
 
-clipLength=[2 .5]; % Ham/Gas
+clipLength=[.5 .5]; % Ham/Gas
 Fs=250;
-clipOverlap=[.9 .9]; % Ham/Gas
+clipOverlap=[0 0]; % Ham/Gas
 
 for indF=1:length(filenames)
     Data=readtable(filenames(indF).name,'ReadVariableNames',false);
