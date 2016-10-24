@@ -8,15 +8,16 @@ clear all
 
 filenames=rdir('Z:\Stroke MC10\LabeledData\**\*.csv');
 
-normalize=1;
+% option to normalize the data before computing features
+normalize=0;
 extradir=[];
 if normalize
     extradir='Normalized\';
 end
 
-clipLength=[.5 .5]; % Ham/Gas
+clipLength=[1 1]; % Ham/Gas
 Fs=250;
-clipOverlap=[0 0]; % Ham/Gas
+clipOverlap=[.9 .9]; % Ham/Gas
 
 for indF=1:length(filenames)
     Data=readtable(filenames(indF).name,'ReadVariableNames',false);

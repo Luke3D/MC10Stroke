@@ -1,6 +1,6 @@
 % Clonus vs Hyperreflexia classification
-
-load FullPatientData_norm
+clear all
+load FullPatientData_HRvC_1s
 
 HyperRData=cell2mat(PatientData.h');
 ClonusData=cell2mat(PatientData.g');
@@ -36,22 +36,33 @@ Iinds=strcmp('I',mat2cell(ClonusLabels(:,1),ones(sum(Clengths),1)));
 ClonusLabels=[repmat('C',[sum(Sinds) 1]); repmat('I',[sum(Iinds) 1])];
 ClonusData=[[ClonusData(Sinds,:); ClonusData(Iinds,:)] [CSubjs(Sinds); CSubjs(Iinds)]];
 
-HSubjs=HyperRData(:,end);
-CSubjs=ClonusData(:,end);
+Data=[HyperRData; ClonusData];
+Labels=[HyperRLabels; ClonusLabels];
 
-for indSub=1:length(unique([ClonusData(:,end); HyperRData(:,end)]))
-    Train=[HyperRData(HSubjs~=indSub,1:end-1); ClonusData(CSubjs~=indSub,1:end-1)];
-    TrainLab=[HyperRLabels(HSubjs~=indSub); ClonusLabels(CSubjs~=indSub)];
+for i=1:length(unique(Data(:,end)))
+    if length(unique(Labels(Data(:,end)==i)))<3
+        Data(Data(:,end)==i,:)=[];
+        Labels(Data(:,end)==i)=[];
+    end
+end
+
+for indSub=1:length(unique(Data(:,end)))
+    Train=Data(Data(:,end)~=indSub,1:end-1);
+    TrainLab=Labels(Data(:,end)~=indSub);
     TrainLab=mat2cell(TrainLab,ones(length(TrainLab),1));
     
-    Test=[HyperRData(HSubjs==indSub,1:end-1); ClonusData(CSubjs==indSub,1:end-1)];
-    TestLab=[HyperRLabels(HSubjs==indSub); ClonusLabels(CSubjs==indSub)];
+    Test=Data(Data(:,end)==indSub,1:end-1);
+    TestLab=Labels(Data(:,end)==indSub);
     TestLab=mat2cell(TestLab,ones(length(TestLab),1));
+    
+    if isempty(Test)
+        continue
+    end
     
 %     Model=TreeBagger(50,Train,TrainLab);
     t = templateTree('MinLeafSize',5);
     Model = fitensemble(Train, TrainLab, 'RUSBoost', 50, t,'LearnRate',.1);
-    figure; plot(loss(Model,Test,TestLab,'mode','cumulative'));
+%     figure; plot(loss(Model,Test,TestLab,'mode','cumulative'));
     
     RFLabels=predict(Model,Test);
     ConfMat(:,:,indSub)=confusionmat(TestLab,RFLabels,'order',{'I','C','R'});
@@ -71,3 +82,12 @@ for indSub=1:size(ConfMat,3)
     set(gca,'XTick',[1 2 3])
     set(gca,'YTick',[1 2 3])
 end
+
+ConfMatAll=sum(ConfMat,3);
+correctones = sum(ConfMatAll,2);
+correctones = repmat(correctones,[1 3]);
+figure; imagesc(ConfMatAll./correctones, [0 1]); colorbar
+set(gca,'XTickLabel',{'I','C','R'})
+set(gca,'YTickLabel',{'I','C','R'})
+set(gca,'XTick',[1 2 3])
+set(gca,'YTick',[1 2 3])
