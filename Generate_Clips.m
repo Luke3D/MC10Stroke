@@ -15,7 +15,7 @@ if normalize
     extradir='Normalized\';
 end
 
-clipLength=[2 .5]; % Ham/Gas
+clipLength=[2 1]; % Ham/Gas
 Fs=250;
 clipOverlap=[.9 .9]; % Ham/Gas
 

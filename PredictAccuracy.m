@@ -6,8 +6,8 @@ RUS=1;
 resamp_test=0;
 resamp_train=0;
 
-% load('FullPatientData_Norm.mat')
-load('FullPatientData.mat')
+load('FullPatientData_Norm.mat')
+% load('FullPatientData.mat')
 
 N = {'h' 'g'};
 n = [17, 29];
@@ -171,17 +171,17 @@ for ii = 1:2
 
         if RUS
             t = templateTree('MinLeafSize',5);
-            Model = fitensemble(trainingData(:,2:end), trainingLabels, 'RUSBoost', 50, t,'LearnRate',.1);
+            Model = fitensemble(trainingData(:,:), trainingLabels, 'RUSBoost', 50, t,'LearnRate',.1);
 %             figure; plot(loss(Model, testData, testLabels,'mode','cumulative'))
         else
-            Model = TreeBagger(nTrees, trainingData(:,2:end), trainingLabels, 'OOBVarImp', 'on');
+            Model = TreeBagger(nTrees, trainingData(:,:), trainingLabels, 'OOBVarImp', 'on');
             if isempty(err{ii})
                 err{ii}=zeros(size(Model.OOBPermutedVarDeltaError));
             end
             err{ii} = err{ii}+Model.OOBPermutedVarDeltaError;
         end
         
-        LabelsRF = predict(Model, testData(:,2:end));
+        LabelsRF = predict(Model, testData(:,:));
         
         if sum(strcmp(LabelsRF, 'SA')) >= 1
             SAindex = [SAindex [ii;jj]];
