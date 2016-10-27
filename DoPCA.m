@@ -31,9 +31,17 @@ end
 for x = 1:size(subject,1)
     if x == 1
         for i = 1:len(1);
+            % identify day
+            if ~isempty(strfind(filenames(i).name,'Day1'))
+                day=1;
+            else
+                day=2;
+            end
+            
             Features = load(filenames(i).name);
             Features = Features.AllFeat;
-            f = [f; cell2mat({Features(:).Features}')];
+            
+            f = [f; [repmat(day, [size(Features,1) 1]) cell2mat({Features(:).Features}')]];
             lab = [lab; {Features(:).ActivityLabel}'];
         end
         
@@ -60,9 +68,18 @@ for x = 1:size(subject,1)
 
     else
         for i = len(x-1) + 1 : len(x)
+            
+            % identify day
+            if ~isempty(strfind(filenames(i).name,'Day1'))
+                day=1;
+            else
+                day=2;
+            end
+            
             Features = load(filenames(i).name);
             Features = Features.AllFeat;
-            f = [f; cell2mat({Features(:).Features}')];
+            
+            f = [f; [repmat(day, [size(Features,1) 1]) cell2mat({Features(:).Features}')]];
             lab = [lab; {Features(:).ActivityLabel}'];
         end
         
@@ -90,8 +107,8 @@ for x = 1:size(subject,1)
 end
 end
 
-% save('PatientData.mat', 'PatientData')
-save('FullPatientData_HRvC_1s.mat', 'PatientData')
+save('FullPatientData.mat', 'PatientData')
+% save('FullPatientData_HRvC_1s.mat', 'PatientData')
 %end
 
 %% PCA

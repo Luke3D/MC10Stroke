@@ -6,8 +6,8 @@ RUS=1;
 resamp_test=0;
 resamp_train=0;
 
-load('FullPatientData_Norm.mat')
-% load('FullPatientData.mat')
+% load('FullPatientData_Norm.mat')
+load('FullPatientData.mat')
 
 N = {'h' 'g'};
 n = [17, 29];
@@ -16,15 +16,15 @@ SAindex = [];
 err=cell(2,1);
 
 load('Good_inds.mat')
-% useinds={1:n(1), 1:n(2)};
-% useinds{1}(H_good)=[];
-% useinds{2}(G_good)=[];
+useinds={1:n(1), 1:n(2)};
+useinds{1}(H_good)=[];
+useinds{2}(G_good)=[];
 % useinds{1}(1:3)=[];
 % useinds{2}(1:2)=[];
 % useinds{1}=[useinds{1} H_good];
 % useinds{2}=[useinds{2} G_good([1 4 6:11])];
-useinds={H_good, G_good};
-% useinds={};
+% useinds={[H_good 12], G_good};
+useinds={};
 inclInactive = 0;
 
 if ~inclInactive
@@ -171,17 +171,17 @@ for ii = 1:2
 
         if RUS
             t = templateTree('MinLeafSize',5);
-            Model = fitensemble(trainingData, trainingLabels, 'RUSBoost', 200, t,'LearnRate',.1);
+            Model = fitensemble(trainingData(:,2:end), trainingLabels, 'RUSBoost', 50, t,'LearnRate',.1);
 %             figure; plot(loss(Model, testData, testLabels,'mode','cumulative'))
         else
-            Model = TreeBagger(nTrees, trainingData, trainingLabels, 'OOBVarImp', 'on');
+            Model = TreeBagger(nTrees, trainingData(:,2:end), trainingLabels, 'OOBVarImp', 'on');
             if isempty(err{ii})
                 err{ii}=zeros(size(Model.OOBPermutedVarDeltaError));
             end
             err{ii} = err{ii}+Model.OOBPermutedVarDeltaError;
         end
         
-        LabelsRF = predict(Model, testData);
+        LabelsRF = predict(Model, testData(:,2:end));
         
         if sum(strcmp(LabelsRF, 'SA')) >= 1
             SAindex = [SAindex [ii;jj]];

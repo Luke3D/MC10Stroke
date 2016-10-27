@@ -78,9 +78,21 @@ for i=1:size(X,1)
     for k = 1:6
         fint = freqx(round((k-1)*l/6+1):round(k*l/6));
         freqpow(k) = trapz(fint,psdx(round((k-1)*l/6+1):round(k*l/6)))/trapz(freqx,psdx);
-        fvec = [fvec freqpow(k)];    flab = [flab; ['-Fpow-', num2str(k*20)]];
+        fvec = [fvec freqpow(k)];    flab = [flab; ['-Fpow-rel-', num2str(k*20)]];
     end
 
+    N = length(x);
+    xdft = fft(x,2^nextpow2(N));
+    xdft = xdft(1:round(N/2)+1);
+    psdx = abs(xdft).^2;
+    freqx = linspace(0,Fs/2,length(psdx));
+    l = length(freqx);
+    for k = 1:6
+        fint = freqx(round((k-1)*l/6+1):round(k*l/6));
+        freqpow(k) = trapz(fint,psdx(round((k-1)*l/6+1):round(k*l/6)));
+        fvec = [fvec freqpow(k)];    flab = [flab; ['-Fpow-', num2str(k*20)]];
+    end
+    
     
 end
 

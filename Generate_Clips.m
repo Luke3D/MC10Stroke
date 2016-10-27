@@ -15,7 +15,7 @@ if normalize
     extradir='Normalized\';
 end
 
-clipLength=[1 1]; % Ham/Gas
+clipLength=[2 .5]; % Ham/Gas
 Fs=250;
 clipOverlap=[.9 .9]; % Ham/Gas
 
@@ -78,6 +78,7 @@ for indF=1:length(filenames)
             Label{indClip-skips}='IA';
         end
         newData=EMG(indStart:indEnd,:);
+        newData_env=EMG_env(indStart:indEnd,:);
         if normalize
             newData=(newData-mean(newData))/std(newData);
         end
@@ -86,7 +87,7 @@ for indF=1:length(filenames)
 %         Features{indClip}=[getFeatures(ACC(indStart:indEnd,:).') getEMGFeatures(EMG(indStart:indEnd,:).',std(EMG)*.2) getEMGFeatures(EMG_env(indStart:indEnd).',std(EMG)*.2)];
         %combine raw emg features and emg envelope features
 %         Features{indClip-skips}=[getEMGFeatures_New(EMG(indStart:indEnd,:).',std(EMG)*.2) getEMGFeatures_New(EMG_env(indStart:indEnd).',std(EMG)*.2)];
-        Features{indClip-skips}= getEMGFeatures(newData');
+        Features{indClip-skips}= [getEMGFeatures(newData') getEMGFeatures(newData_env')];
 
     end
     Label(cellfun(@isempty,Label)==1)=[];
