@@ -86,22 +86,33 @@ handles.data = [];
 % N_emg=N(I:end,1:2);
 % x1 = N_acc(:,1);
 % x2 = N_emg(:,1);
+N(:,1)=N(:,1)-min(N(:,1));
 x=N(:,1);
 % Sf = round((R{10}-R{1})*100);   %get sampling time from data
 % x = x/Sf;
 handles.filename = filename(1:end-4);
 handles.pathname = pathname;
 set(handles.textFileLoaded,'string',[pathname,handles.filename,'.csv']);
-plot(handles.mainAxes,x,N(:,2),'b');    %AXIS 1 (Worn on Waist: Vertical) OLD convention
-% plot(handles.mainAxes,x1,N(:,3),'r');    %AXIS 2 (Horiz)
-% plot(handles.mainAxes,x1,N(:,4),'g');    %AXIS 3 (Orthogonal)
+plot(handles.mainAxes,x,N(:,2),'b');   
 EMG_RAW=[N(:,1) N(:,5)];
 EMG(:,2)=abs(EMG_RAW(:,2));
 [B,A] = butter(1, 20/125, 'low');
 EMG(:,2)=filtfilt(B,A,EMG(:,2));
 
-plot(handles.mainAxes,x,EMG(:,2)*10000-2,'c');
+% plot(handles.mainAxes,x,EMG(:,2)*10000-2,'c');
 plot(handles.mainAxes,x,EMG_RAW(:,2)*1000-1,'r');
+
+D=N(:,5);
+
+numwin=floor(size(D,1)/2);
+integral=zeros(numwin,1);
+
+for indWin=1:numwin
+    integral(2*(indWin-1)+1:2*indWin)=repmat(trapz(abs(D(2*(indWin-1)+1:2*indWin))),[1 2]);
+    x_coor(2*(indWin-1)+1:2*indWin)=[1/125*(indWin-1) 1/125*indWin];
+end
+
+plot(x_coor,integral*10000-2,'c')
 
 legend('ACC','EMG','RAW')
 col = size(N,2);
@@ -201,53 +212,97 @@ else
 end
 end
 function buttonFillGaps_Callback(hObject, eventdata, handles)
-if handles.data == 0
+if isempty(handles)
+    return;
+end
+if handles.data ==0
     return;
 end
 N = handles.data;
 activityIndex = handles.activityIndex;
 locationIndex = handles.locationIndex;
-fillStart = 0;
-for i = 1:size(N,1)
-    if N(1,activityIndex) == 0
-        fillStart = 1;
-    end
-    
-    if fillStart == 1 && N(i,activityIndex) ~= 0
-        N(1:i,activityIndex) =  N(i,activityIndex);
-        N(1:i,locationIndex) =  N(i,locationIndex);
-        fillStart = 0;
-        lastActivityValue = N(i,activityIndex);
-        lastLocationValue = N(i,locationIndex);
-        plot(handles.mainAxes,1:i,handles.data(1:i,2),'color',handles.colors{N(i,activityIndex)},...
-            'marker',handles.markerTypes{N(i,locationIndex)},...
-            'MarkerSize',1);
-        plot(handles.mainAxes,1:i,handles.data(1:i,3),'color',handles.colors{N(i,activityIndex)},...
-            'marker',handles.markerTypes{N(i,locationIndex)},...
-            'MarkerSize',1);
-        plot(handles.mainAxes,1:i,handles.data(1:i,4),'color',handles.colors{N(i,activityIndex)},...
-            'marker',handles.markerTypes{N(i,locationIndex)},...
-            'MarkerSize',1);
-    elseif (N(i,activityIndex) == 0 && fillStart == 0)
-        N(i,activityIndex) = lastActivityValue;
-        N(i,locationIndex) =  lastLocationValue;
-        plot(handles.mainAxes,i-1:i,handles.data(i-1:i,2),'color',handles.colors{N(i,activityIndex)},...
-            'marker',handles.markerTypes{N(i,locationIndex)},...
-            'MarkerSize',1);
-        plot(handles.mainAxes,i-1:i,handles.data(i-1:i,3),'color',handles.colors{N(i,activityIndex)},...
-            'marker',handles.markerTypes{N(i,locationIndex)},...
-            'MarkerSize',1);
-        plot(handles.mainAxes,i-1:i,handles.data(i-1:i,4),'color',handles.colors{N(i,activityIndex)},...
-            'marker',handles.markerTypes{N(i,locationIndex)},...
-            'MarkerSize',1);
-    else
-        lastActivityValue = N(i,activityIndex);
-        lastLocationValue = N(i,locationIndex);
-    end
+
+if handles.marker2 > handles.marker1
+%     [~, m1] = min(abs(handles.data(:,1)-handles.marker1));
+    m1 = round(handles.marker1*250+1);
+    m2 = round(handles.marker2*250+1);
+else
+    m1 = round(handles.marker2*250+1);
+    m2 = round(handles.marker1*250+1);
 end
-handles.data = N;
-guidata(hObject,handles);
-msgbox('Finished Filling Gaps');
+
+D=N(m1:m2,5);
+
+numwin=floor(size(D,1)/2);
+integral=zeros(numwin,1);
+
+for indWin=1:numwin
+    integral(indWin)=trapz(abs(D(2*(indWin-1)+1:2*indWin)));
+end
+
+bin=sort(integral);
+bin=bin(floor(.9*length(bin)):end);
+thresh=mean(bin)+3*std(bin);
+
+axes=gca;
+range=axes.XLim;
+
+plot(range,[thresh thresh]*10000-2)
+
+D=N(:,5);
+
+numwin=floor(size(D,1)/2);
+integral=zeros(numwin,1);
+
+for indWin=1:numwin
+    integral(indWin)=trapz(abs(D(2*(indWin-1)+1:2*indWin)));
+end
+
+% for i=1:length(integral)-12
+%     A(i)=sum(integral(i:i+12)>thresh);
+% end
+
+% fillStart = 0;
+% for i = 1:size(N,1)
+%     if N(1,activityIndex) == 0
+%         fillStart = 1;
+%     end
+%     
+%     if fillStart == 1 && N(i,activityIndex) ~= 0
+%         N(1:i,activityIndex) =  N(i,activityIndex);
+%         N(1:i,locationIndex) =  N(i,locationIndex);
+%         fillStart = 0;
+%         lastActivityValue = N(i,activityIndex);
+%         lastLocationValue = N(i,locationIndex);
+%         plot(handles.mainAxes,1:i,handles.data(1:i,2),'color',handles.colors{N(i,activityIndex)},...
+%             'marker',handles.markerTypes{N(i,locationIndex)},...
+%             'MarkerSize',1);
+%         plot(handles.mainAxes,1:i,handles.data(1:i,3),'color',handles.colors{N(i,activityIndex)},...
+%             'marker',handles.markerTypes{N(i,locationIndex)},...
+%             'MarkerSize',1);
+%         plot(handles.mainAxes,1:i,handles.data(1:i,4),'color',handles.colors{N(i,activityIndex)},...
+%             'marker',handles.markerTypes{N(i,locationIndex)},...
+%             'MarkerSize',1);
+%     elseif (N(i,activityIndex) == 0 && fillStart == 0)
+%         N(i,activityIndex) = lastActivityValue;
+%         N(i,locationIndex) =  lastLocationValue;
+%         plot(handles.mainAxes,i-1:i,handles.data(i-1:i,2),'color',handles.colors{N(i,activityIndex)},...
+%             'marker',handles.markerTypes{N(i,locationIndex)},...
+%             'MarkerSize',1);
+%         plot(handles.mainAxes,i-1:i,handles.data(i-1:i,3),'color',handles.colors{N(i,activityIndex)},...
+%             'marker',handles.markerTypes{N(i,locationIndex)},...
+%             'MarkerSize',1);
+%         plot(handles.mainAxes,i-1:i,handles.data(i-1:i,4),'color',handles.colors{N(i,activityIndex)},...
+%             'marker',handles.markerTypes{N(i,locationIndex)},...
+%             'MarkerSize',1);
+%     else
+%         lastActivityValue = N(i,activityIndex);
+%         lastLocationValue = N(i,locationIndex);
+%     end
+% end
+% handles.data = N;
+% guidata(hObject,handles);
+% msgbox('Finished Filling Gaps');
 end
 function varargout = buttonMark1_Callback(hObject, eventdata, handles)
 if isempty(handles.dataText)

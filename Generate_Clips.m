@@ -84,9 +84,7 @@ for indF=1:length(filenames)
         end
         EMG_all{indClip-skips}=newData;
         
-%         Features{indClip}=[getFeatures(ACC(indStart:indEnd,:).') getEMGFeatures(EMG(indStart:indEnd,:).',std(EMG)*.2) getEMGFeatures(EMG_env(indStart:indEnd).',std(EMG)*.2)];
         %combine raw emg features and emg envelope features
-%         Features{indClip-skips}=[getEMGFeatures_New(EMG(indStart:indEnd,:).',std(EMG)*.2) getEMGFeatures_New(EMG_env(indStart:indEnd).',std(EMG)*.2)];
         Features{indClip-skips}= [getEMGFeatures(newData') getEMGFeatures(newData_env')];
 
     end
@@ -95,13 +93,24 @@ for indF=1:length(filenames)
     Features(cellfun(@isempty,Features)==1)=[];
     % Save data structures
     
-    AllClips=struct('SubjID', 'CS001',  'ActivityLabel', Label, ...
+    Clips=struct('SubjID', 'CS001',  'ActivityLabel', Label, ...
         'Emg', EMG_all, 'SamplingT', 1000/Fs, 'ClipDur', clipLength, 'ClipOverlap', clipOverlap, 'RecordingDur', 0);
+    if indF==1
+        AllClips=Clips;
+    else
+        AllClips=[AllClips; Clips];
+    end
+%     save([savepath '/' filename(1:end-7) 'Clips.mat'],'AllClips')
     
-    save([savepath '/' filename(1:end-7) 'Clips.mat'],'AllClips')
-    
-    AllFeat=struct('SubjID', 'CS001',  'ActivityLabel', Label, 'Features', ...
+    Feat=struct('SubjID', 'CS001',  'ActivityLabel', Label, 'Features', ...
         Features, 'SamplingT', 1000/Fs, 'ClipDur', clipLength, 'ClipOverlap', clipOverlap, 'RecordingDur', 0);
+    if indF==1
+        AllFeat=Feat;
+    else
+        AllFeat=[AllFeat; Feat];
+    end
     
-    save([savepath '/' filename(1:end-7) 'Feat.mat'],'AllFeat')
+%     save([savepath '/' filename(1:end-7) 'Feat.mat'],'AllFeat')
 end
+
+save Features AllFeat

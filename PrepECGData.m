@@ -13,7 +13,7 @@ initBuff=3000;
 % RemoveSub={'CS001', 'CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007', 'CS008', 'CS009', 'CS011', 'CS012'};
 RemoveSub={};
 dirname='Z:\Stroke MC10\';
-Locations={'Medial Chest'};
+Locations={'Medial Chest', 'Gastrocnemius', 'Hamstring'};
 
 % Identify Directories with Raw Subject Data
 filenames=dir([dirname 'CS*']);
@@ -39,7 +39,7 @@ for indDir=1:length(filenames)
     % Loop through activity list in Times
     for i=1:height(Times)
         for indLoc=1:length(Locations)
-            if isempty(strmatch(Times.Label{i},'6MWT'))
+            if isempty(strfind(Times.Label{i},'6MWT')) && isempty(strfind(Times.Label{i},'6mWT'))
                 continue
             end
             startStamp=datetime(1970, 1, 1, 0, 0, Times.Start(i)/1000);
@@ -76,8 +76,13 @@ for indDir=1:length(filenames)
                 afe=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
                     '\' datafiles(ind).name '\sensors\afe.csv']);
             else
-                afe=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
-                    '\' datafiles(ind).name '\sensors\ecg.csv']);               
+                if indLoc==1
+                    afe=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
+                        '\' datafiles(ind).name '\sensors\ecg.csv']);
+                else
+                    afe=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
+                        '\' datafiles(ind).name '\sensors\emg.csv']);
+                end
             end
             % load accel data
             accel=xlsread([dirname subject '\Lab Day ' numDay '\' Locations{indLoc} ... 
@@ -131,13 +136,20 @@ for indDir=1:length(filenames)
             % Save prepped data
             X=cell2mat(Times.Label(i));
 
-            saveName=[dirname '6MWT ECG\' subject '_Day' num2str(Day) '_' X ...
+            saveName=[dirname '6MWT EMG\' Locations{indLoc} '\' subject '_Day' num2str(Day) '_' X ...
                 '_ecgData.csv'];
             
-            accName=[dirname '6MWT ACC\' subject '_Day' num2str(Day) ...
+            accName=[dirname '6MWT ACC\' Locations{indLoc} '\' subject '_Day' num2str(Day) ...
                 '_' X '_accData.csv'];
 
+            if ~exist([dirname '6MWT EMG\' Locations{indLoc}], 'dir')
+                mkdir([dirname '6MWT EMG\' Locations{indLoc} '\'])
+            end
 
+            if ~exist([dirname '6MWT ACC\' Locations{indLoc}], 'dir')
+                mkdir([dirname '6MWT ACC\' Locations{indLoc} '\'])
+            end
+            
             dlmwrite(saveName,EMG,'delimiter',',','precision',13)
             dlmwrite(accName,ACC,'delimiter',',','precision',13)
         end
